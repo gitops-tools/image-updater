@@ -2,14 +2,16 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net/http"
+	"os"
 
+	"github.com/bigkevmcd/quay-imager/pkg/hook"
+	"github.com/bigkevmcd/quay-imager/pkg/hook/client"
+	"github.com/bigkevmcd/quay-imager/pkg/hook/config"
+	"github.com/jenkins-x/go-scm/scm/factory"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
-
-	"github.com/bigkevmcd/quay-imager/pkg/pushhook"
 )
 
 func makeHTTPCmd() *cobra.Command {
@@ -19,15 +21,28 @@ func makeHTTPCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			logger, _ := zap.NewProduction()
 			defer func() {
-				err := logger.Sync() // flushes buffer, if any
-				if err != nil {
-					log.Fatal(err)
-				}
+				_ = logger.Sync() // flushes buffer, if any
 			}()
+
+			scmClient, err := factory.NewClient(viper.GetString("driver"), "", githubToken())
+			if err != nil {
+				return fmt.Errorf("failed to create a git driver: %s", err)
+			}
+
 			sugar := logger.Sugar()
-			handler := pushhook.NewHandler(sugar)
-			http.Handle("/pushhook", handler)
+
+			f, err := os.Open(viper.GetString("config-file"))
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+			repos, err := config.Parse(f)
+
+			updater := hook.New(sugar, client.New(scmClient), repos)
+			handler := hook.NewHandler(sugar, updater)
+			http.Handle("/hook", handler)
 			listen := fmt.Sprintf(":%d", viper.GetInt("port"))
+			sugar.Infow("quay-hooks http starting", "port", viper.GetInt("port"))
 			return http.ListenAndServe(listen, nil)
 		},
 	}
@@ -39,5 +54,22 @@ func makeHTTPCmd() *cobra.Command {
 	)
 	logIfError(viper.BindPFlag("port", cmd.Flags().Lookup("port")))
 
+	cmd.Flags().String(
+		"driver",
+		"github",
+		"go-scm driver name to use e.g. github, gitlab",
+	)
+	logIfError(viper.BindPFlag("driver", cmd.Flags().Lookup("driver")))
+
+	cmd.Flags().String(
+		"config-file",
+		"/etc/quay-imager/config.yaml",
+		"repository configuration",
+	)
+	logIfError(viper.BindPFlag("config-file", cmd.Flags().Lookup("config-file")))
 	return cmd
+}
+
+func githubToken() string {
+	return os.Getenv("GITHUB_TOKEN")
 }

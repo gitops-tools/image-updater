@@ -1,0 +1,7 @@
+repositories:
+  - name: testing/repo-image
+    sourceRepo: example/example-source
+    sourceBranch: master
+    filePath: test/file.yaml
+    updateKey: person.name
+    branchGenerateName: repo-imager-

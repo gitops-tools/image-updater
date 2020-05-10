@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quay-imager-http
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: quay-imager-http
+  template:
+    metadata:
+     labels:
+       app.kubernetes.io/name: quay-imager-http
+    spec:
+      containers:
+        - name: quay-imager-http
+          image: quay.io/bigkevmcd/quay-imager
+          imagePullPolicy: Always
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/quay-imager
+          env:
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: quay-imager-secret
+                  key: token
+      volumes:
+        - name: config-volume
+          configMap:
+            name: quay-imager-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quay-imager-http
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: quay-imager-http
+  ports:
+    - protocol: TCP
+      port: 8080

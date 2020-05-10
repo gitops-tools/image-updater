@@ -1,4 +1,4 @@
-package hook
+package quay
 
 import (
 	"encoding/json"
