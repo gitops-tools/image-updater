@@ -51,7 +51,9 @@ $ kubectl create secret generic quay-imager-secret --from-literal=token=$GITHUB_
 
 ## Deployment
 
-A k8s `Deployment` is provided in [./deploy/deployment.yaml](./deploy/deployment.yaml).
+A Kubernetes `Deployment` is provided in [./deploy/deployment.yaml](./deploy/deployment.yaml).
+
+The service is not dependent on being executed within a Kubernetes cluster.
 
 ## Exposing the Handler
 
