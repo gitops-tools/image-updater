@@ -1,4 +1,4 @@
-# quay-imager
+# quay-imager ![Go](https://github.com/bigkevmcd/quay-imager/workflows/Go/badge.svg)
 
 A micro-service for updating Git Repos when a Quay image hook is received.
 
