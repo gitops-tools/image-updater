@@ -1,0 +1,7 @@
+repositories:
+  - name: quay-org/my-image
+    sourceRepo: my-github-org/my-repo
+    sourceBranch: master
+    filePath: deploy/person.yaml
+    updateKey: spec.template.spec.containers.0.image
+    branchGenerateName: repo-imager-

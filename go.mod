@@ -5,7 +5,7 @@ go 1.14
 require (
 	github.com/google/go-cmp v0.4.0
 	github.com/h2non/gock v1.0.9
-	github.com/jenkins-x/go-scm v0.0.0-00010101000000-000000000000
+	github.com/jenkins-x/go-scm v1.5.124
 	github.com/kr/text v0.2.0 // indirect
 	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
@@ -22,5 +22,3 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	sigs.k8s.io/yaml v1.2.0
 )
-
-replace github.com/jenkins-x/go-scm => /home/kmcdermo/go/src/github.com/jenkins-x/go-scm

@@ -2,8 +2,11 @@
 
 A micro-service for updating Git Repos when a Quay image hook is received.
 
-**NOTE:** Quay.io provides no way for receivers to authenticate Webhooks, which
-makes this insecure.  Please understand the risks of using this component.
+## WARNING
+
+Quay.io provides no way for receivers to authenticate Webhooks, which makes this insecure, a malicious user could trigger the creation of pull requests in your git hosting service.
+
+Please understand the risks of using this component.
 
 ## Configuration
 
