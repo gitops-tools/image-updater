@@ -39,7 +39,7 @@ func TestUpdaterWithKnownRepo(t *testing.T) {
 	updater.Update(context.Background(), hook)
 
 	updated := m.GetUpdatedContents(testGitHubRepo, testFilePath, "known-branch")
-	want := "test:\n  image: quay.io/testorg/repo\n"
+	want := "test:\n  image: quay.io/testorg/repo:production\n"
 	if s := string(updated); s != want {
 		t.Fatalf("update failed, got %#v, want %#v", s, want)
 	}
@@ -54,8 +54,9 @@ func TestUpdaterWithKnownRepo(t *testing.T) {
 
 func createHook() *quay.RepositoryPushHook {
 	return &quay.RepositoryPushHook{
-		Repository: testQuayRepo,
-		DockerURL:  "quay.io/testorg/repo",
+		Repository:  testQuayRepo,
+		DockerURL:   "quay.io/testorg/repo",
+		UpdatedTags: []string{"production"},
 	}
 }
 

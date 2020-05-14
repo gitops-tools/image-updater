@@ -45,13 +45,17 @@ $ kubectl create configmap quay-imager-config --from-file=config.yaml
 ```
 
 ```shell
-export GITHUB_TOKEN=<insert github token>
-$ kubectl create secret generic quay-imager-client --from-literal=token=$GITHUB_TOKEN
+$ export GITHUB_TOKEN=<insert github token>
+$ kubectl create secret generic quay-imager-secret --from-literal=token=$GITHUB_TOKEN
 ```
 
 ## Deployment
 
 A k8s `Deployment` is provided in [./deploy/deployment.yaml](./deploy/deployment.yaml).
+
+## Exposing the Handler
+
+The Service exposes a Hook handler at `/` on port 8080 that handles the hooks.
 
 ## Building
 
