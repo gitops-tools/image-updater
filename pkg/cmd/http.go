@@ -31,7 +31,7 @@ func makeHTTPCmd() *cobra.Command {
 
 			sugar := logger.Sugar()
 
-			f, err := os.Open(viper.GetString("config-file"))
+			f, err := os.Open(viper.GetString("config"))
 			if err != nil {
 				return err
 			}
@@ -40,7 +40,7 @@ func makeHTTPCmd() *cobra.Command {
 
 			updater := hook.New(sugar, client.New(scmClient), repos)
 			handler := hook.NewHandler(sugar, updater)
-			http.Handle("/hook", handler)
+			http.Handle("/", handler)
 			listen := fmt.Sprintf(":%d", viper.GetInt("port"))
 			sugar.Infow("quay-hooks http starting", "port", viper.GetInt("port"))
 			return http.ListenAndServe(listen, nil)
@@ -62,11 +62,11 @@ func makeHTTPCmd() *cobra.Command {
 	logIfError(viper.BindPFlag("driver", cmd.Flags().Lookup("driver")))
 
 	cmd.Flags().String(
-		"config-file",
+		"config",
 		"/etc/quay-imager/config.yaml",
 		"repository configuration",
 	)
-	logIfError(viper.BindPFlag("config-file", cmd.Flags().Lookup("config-file")))
+	logIfError(viper.BindPFlag("config", cmd.Flags().Lookup("config")))
 	return cmd
 }
 

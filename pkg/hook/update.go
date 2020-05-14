@@ -44,7 +44,10 @@ func (u *Updater) Update(ctx context.Context, h *quay.RepositoryPushHook) error 
 		return err
 	}
 	u.log.Infow("got existing file", "sha", current.Sha)
-	updated, err := syaml.SetBytes(current.Data, cfg.UpdateKey, h.DockerURL)
+	newURL := fmt.Sprintf("%s:%s", h.DockerURL, h.UpdatedTags[0])
+
+	u.log.Infow("new image reference", "image", newURL)
+	updated, err := syaml.SetBytes(current.Data, cfg.UpdateKey, newURL)
 
 	masterRef, err := u.gitClient.GetBranchHead(ctx, cfg.SourceRepo, cfg.SourceBranch)
 	newBranchName := u.nameGenerator(cfg.BranchGenerateName)

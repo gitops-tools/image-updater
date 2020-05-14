@@ -53,6 +53,10 @@ $ kubectl create secret generic quay-imager-client --from-literal=token=$GITHUB_
 
 A k8s `Deployment` is provided in [./deploy/deployment.yaml](./deploy/deployment.yaml).
 
+## Exposing the Handler
+
+The Service exposes a Hook handler at `/` on port 8080 that handles the hooks.
+
 ## Building
 
 A `Dockerfile` is provided for building a container, but otherwise:
