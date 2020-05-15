@@ -43,3 +43,29 @@ func TestSet(t *testing.T) {
 		}
 	}
 }
+
+func TestSetFailures(t *testing.T) {
+	setTests := []struct {
+		source  string
+		patch   string
+		wantErr string
+	}{
+		{
+			source:  ": testing\n",
+			patch:   "name",
+			wantErr: "yaml: did not find expected key",
+		},
+		{
+			source:  "name: testing\n",
+			patch:   "",
+			wantErr: "path cannot be empty",
+		},
+	}
+
+	for i, tt := range setTests {
+		_, err := SetBytes([]byte(tt.source), tt.patch, "testing")
+		if err.Error() != tt.wantErr {
+			t.Fatalf("%d failed, got %s, want %s", i, err, tt.wantErr)
+		}
+	}
+}

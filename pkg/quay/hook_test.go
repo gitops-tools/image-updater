@@ -2,6 +2,7 @@ package quay
 
 import (
 	"bytes"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -10,8 +11,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestRepositoryPush(t *testing.T) {
+func TestParseRepositoryPush(t *testing.T) {
 	req := makeHookRequest(t, "testdata/push_hook.json")
+
 	hook, err := ParseRepositoryPush(req)
 	if err != nil {
 		t.Fatal(err)
@@ -30,6 +32,28 @@ func TestRepositoryPush(t *testing.T) {
 	}
 }
 
+func TestParseRepositoryPushWithNoBody(t *testing.T) {
+	bodyErr := errors.New("just a test error")
+
+	req := httptest.NewRequest("POST", "/", failingReader{err: bodyErr})
+
+	_, err := ParseRepositoryPush(req)
+	if err != bodyErr {
+		t.Fatal("expected an error")
+	}
+
+}
+
+func TestParseRepositoryPushWithUnparseableBody(t *testing.T) {
+	req := httptest.NewRequest("POST", "/", nil)
+
+	_, err := ParseRepositoryPush(req)
+
+	if err == nil {
+		t.Fatal("expected an error")
+	}
+}
+
 func makeHookRequest(t *testing.T, fixture string) *http.Request {
 	t.Helper()
 	b, err := ioutil.ReadFile(fixture)
@@ -39,4 +63,15 @@ func makeHookRequest(t *testing.T, fixture string) *http.Request {
 	req := httptest.NewRequest("POST", "/", bytes.NewReader(b))
 	req.Header.Add("Content-Type", "application/json")
 	return req
+}
+
+type failingReader struct {
+	err error
+}
+
+func (f failingReader) Read(p []byte) (n int, err error) {
+	return 0, f.err
+}
+func (f failingReader) Close() error {
+	return f.err
 }

@@ -18,7 +18,7 @@ type logger interface {
 
 // New creates and returns a new Updater.
 func New(l logger, c client.GitClient, cfgs *config.RepoConfiguration) *Updater {
-	return &Updater{gitClient: c, configs: cfgs, nameGenerator: randomNameGenerator, log: l}
+	return &Updater{gitClient: c, configs: cfgs, nameGenerator: randomNameGenerator{timeSeed}, log: l}
 }
 
 // Updater can update a Git repo with an updated version of a file based on a
@@ -50,7 +50,7 @@ func (u *Updater) Update(ctx context.Context, h *quay.RepositoryPushHook) error 
 	updated, err := syaml.SetBytes(current.Data, cfg.UpdateKey, newURL)
 
 	masterRef, err := u.gitClient.GetBranchHead(ctx, cfg.SourceRepo, cfg.SourceBranch)
-	newBranchName := u.nameGenerator(cfg.BranchGenerateName)
+	newBranchName := u.nameGenerator.prefixedName(cfg.BranchGenerateName)
 	err = u.gitClient.CreateBranch(ctx, cfg.SourceRepo, newBranchName, masterRef)
 	if err != nil {
 		return fmt.Errorf("failed to create branch: %w", err)
@@ -75,5 +75,3 @@ func (u *Updater) Update(ctx context.Context, h *quay.RepositoryPushHook) error 
 	u.log.Infow("created PullRequest", "number", pr.Number)
 	return nil
 }
-
-type nameGenerator func(s string) string

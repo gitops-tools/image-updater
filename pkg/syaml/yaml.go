@@ -16,5 +16,8 @@ func SetBytes(y []byte, path string, value interface{}) ([]byte, error) {
 		return nil, err
 	}
 	updated, err := sjson.SetBytes(j, path, value)
+	if err != nil {
+		return nil, err
+	}
 	return yaml.JSONToYAML(updated)
 }
