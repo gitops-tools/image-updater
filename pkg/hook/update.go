@@ -36,15 +36,18 @@ func (u *Updater) Update(ctx context.Context, h *quay.RepositoryPushHook) error 
 		u.log.Infow("failed to find repo", "name", h.Repository)
 		return nil
 	}
-	u.log.Infow("found repo", "name", h.Repository)
+	u.log.Infow("found repo", "name", h.Repository, "dockerURL", h.DockerURL, "tag", h.UpdatedTags[0])
+	return u.UpdateRepository(ctx, cfg, h.Repository, h.DockerURL, h.UpdatedTags[0])
+}
 
+func (u *Updater) UpdateRepository(ctx context.Context, cfg *config.Repository, repository, dockerURL, tag string) error {
 	current, err := u.gitClient.GetFile(ctx, cfg.SourceRepo, cfg.SourceBranch, cfg.FilePath)
 	if err != nil {
 		u.log.Errorw("failed to get file from repo", "error", err)
 		return err
 	}
 	u.log.Infow("got existing file", "sha", current.Sha)
-	newURL := fmt.Sprintf("%s:%s", h.DockerURL, h.UpdatedTags[0])
+	newURL := fmt.Sprintf("%s:%s", dockerURL, tag)
 
 	u.log.Infow("new image reference", "image", newURL)
 	updated, err := syaml.SetBytes(current.Data, cfg.UpdateKey, newURL)
@@ -64,7 +67,7 @@ func (u *Updater) Update(ctx context.Context, h *quay.RepositoryPushHook) error 
 	u.log.Infow("updated file", "filename", cfg.FilePath)
 
 	pr, err := u.gitClient.CreatePullRequest(ctx, cfg.SourceRepo, &scm.PullRequestInput{
-		Title: fmt.Sprintf("Image %s updated", h.Repository),
+		Title: fmt.Sprintf("Image %s updated", repository),
 		Body:  "Automated Image Update",
 		Head:  newBranchName,
 		Base:  "master",
