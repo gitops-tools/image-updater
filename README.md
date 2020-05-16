@@ -1,4 +1,4 @@
-# quay-imager ![Go](https://github.com/bigkevmcd/quay-imager/workflows/Go/badge.svg)
+# image-hooks ![Go](https://github.com/bigkevmcd/image-hooks/workflows/Go/badge.svg)
 
 A micro-service for updating Git Repos when a Quay image hook is received.
 
@@ -41,12 +41,12 @@ The tool reads a YAML definition, which by default is mounted in from a
 `ConfigMap`.
 
 ```shell
-$ kubectl create configmap quay-imager-config --from-file=config.yaml
+$ kubectl create configmap image-hooks-config --from-file=config.yaml
 ```
 
 ```shell
 $ export GITHUB_TOKEN=<insert github token>
-$ kubectl create secret generic quay-imager-secret --from-literal=token=$GITHUB_TOKEN
+$ kubectl create secret generic image-hooks-secret --from-literal=token=$GITHUB_TOKEN
 ```
 
 ## Deployment

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bigkevmcd/quay-imager/pkg/hook/client"
-	"github.com/bigkevmcd/quay-imager/pkg/hook/config"
-	"github.com/bigkevmcd/quay-imager/pkg/quay"
-	"github.com/bigkevmcd/quay-imager/pkg/syaml"
+	"github.com/bigkevmcd/image-hooks/pkg/hook/client"
+	"github.com/bigkevmcd/image-hooks/pkg/hook/config"
+	"github.com/bigkevmcd/image-hooks/pkg/quay"
+	"github.com/bigkevmcd/image-hooks/pkg/syaml"
 	"github.com/jenkins-x/go-scm/scm"
 )
 

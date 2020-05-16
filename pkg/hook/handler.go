@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/bigkevmcd/quay-imager/pkg/quay"
+	"github.com/bigkevmcd/image-hooks/pkg/quay"
 )
 
 type Handler struct {

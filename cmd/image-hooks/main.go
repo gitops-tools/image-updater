@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/bigkevmcd/quay-imager/pkg/cmd"
+	"github.com/bigkevmcd/image-hooks/pkg/cmd"
 )
 
 func main() {

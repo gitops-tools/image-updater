@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/bigkevmcd/quay-imager/pkg/hook"
-	"github.com/bigkevmcd/quay-imager/pkg/hook/client"
-	"github.com/bigkevmcd/quay-imager/pkg/hook/config"
+	"github.com/bigkevmcd/image-hooks/pkg/hook"
+	"github.com/bigkevmcd/image-hooks/pkg/hook/client"
+	"github.com/bigkevmcd/image-hooks/pkg/hook/config"
 	"github.com/jenkins-x/go-scm/scm/factory"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -63,7 +63,7 @@ func makeHTTPCmd() *cobra.Command {
 
 	cmd.Flags().String(
 		"config",
-		"/etc/quay-imager/config.yaml",
+		"/etc/image-hooks/config.yaml",
 		"repository configuration",
 	)
 	logIfError(viper.BindPFlag("config", cmd.Flags().Lookup("config")))

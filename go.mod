@@ -1,8 +1,9 @@
-module github.com/bigkevmcd/quay-imager
+module github.com/bigkevmcd/image-hooks
 
 go 1.14
 
 require (
+	github.com/bigkevmcd/quay-imager v0.0.1
 	github.com/google/go-cmp v0.4.0
 	github.com/h2non/gock v1.0.9
 	github.com/jenkins-x/go-scm v1.5.124

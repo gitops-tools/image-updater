@@ -1,45 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: quay-imager-http
+  name: image-hooks-http
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: quay-imager-http
+      app.kubernetes.io/name: image-hooks-http
   template:
     metadata:
      labels:
-       app.kubernetes.io/name: quay-imager-http
+       app.kubernetes.io/name: image-hooks-http
     spec:
       containers:
-        - name: quay-imager-http
-          image: quay.io/bigkevmcd/quay-imager
+        - name: image-hooks-http
+          image: quay.io/bigkevmcd/image-hooks
           imagePullPolicy: Always
           volumeMounts:
           - name: config-volume
-            mountPath: /etc/quay-imager
+            mountPath: /etc/image-hooks
           env:
             - name: GITHUB_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: quay-imager-secret
+                  name: image-hooks-secret
                   key: token
       volumes:
         - name: config-volume
           configMap:
-            name: quay-imager-config
+            name: image-hooks-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: quay-imager-http
+  name: image-hooks-http
   namespace: default
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/name: quay-imager-http
+    app.kubernetes.io/name: image-hooks-http
   ports:
     - protocol: TCP
       port: 8080
