@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/bigkevmcd/image-hooks/pkg/hooks"
 )
 
-func ParseRepositoryPush(req *http.Request) (*RepositoryPushHook, error) {
+func ParseRequest(req *http.Request) (hooks.PushEvent, error) {
 	// TODO: LimitReader
 	data, err := ioutil.ReadAll(req.Body)
 	if err != nil {
