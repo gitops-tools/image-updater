@@ -1,0 +1,10 @@
+{
+  "name": "repository",
+  "repository": "mynamespace/repository",
+  "namespace": "mynamespace",
+  "docker_url": "quay.io/mynamespace/repository",
+  "homepage": "https://quay.io/repository/mynamespace/repository",
+  "updated_tags": [
+    "latest"
+  ]
+}

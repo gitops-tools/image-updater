@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bigkevmcd/image-hooks/pkg/hook/client"
+	"github.com/bigkevmcd/image-hooks/pkg/handlers/client"
 	"github.com/jenkins-x/go-scm/scm"
 )
 

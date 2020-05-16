@@ -8,8 +8,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/bigkevmcd/image-hooks/pkg/hooks"
 	"github.com/google/go-cmp/cmp"
 )
+
+var _ hooks.PushEvent = (*RepositoryPushHook)(nil)
 
 func TestParseRepositoryPush(t *testing.T) {
 	req := makeHookRequest(t, "testdata/push_hook.json")
@@ -51,6 +54,19 @@ func TestParseRepositoryPushWithUnparseableBody(t *testing.T) {
 
 	if err == nil {
 		t.Fatal("expected an error")
+	}
+}
+
+func TestPushedImageURL(t *testing.T) {
+	hook := &RepositoryPushHook{
+		Name:        "repository",
+		DockerURL:   "quay.io/mynamespace/repository",
+		UpdatedTags: []string{"latest"},
+	}
+	want := "quay.io/mynamespace/repository:latest"
+
+	if u := hook.PushedImageURL(); u != want {
+		t.Fatalf("got %s, want %s", u, want)
 	}
 }
 

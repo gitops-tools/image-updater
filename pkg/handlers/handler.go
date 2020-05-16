@@ -1,11 +1,11 @@
-package hook
+package handlers
 
 import (
 	"net/http"
 
 	"go.uber.org/zap"
 
-	"github.com/bigkevmcd/image-hooks/pkg/quay"
+	"github.com/bigkevmcd/image-hooks/pkg/hooks/quay"
 )
 
 type Handler struct {

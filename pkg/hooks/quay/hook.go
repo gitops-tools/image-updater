@@ -2,6 +2,7 @@ package quay
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -27,4 +28,8 @@ type RepositoryPushHook struct {
 	DockerURL   string   `json:"docker_url"`
 	Homepage    string   `json:"homepage"`
 	UpdatedTags []string `json:"updated_tags,omitempty"`
+}
+
+func (p RepositoryPushHook) PushedImageURL() string {
+	return fmt.Sprintf("%s:%s", p.DockerURL, p.UpdatedTags[0])
 }

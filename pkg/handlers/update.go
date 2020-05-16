@@ -1,12 +1,12 @@
-package hook
+package handlers
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/bigkevmcd/image-hooks/pkg/hook/client"
-	"github.com/bigkevmcd/image-hooks/pkg/hook/config"
-	"github.com/bigkevmcd/image-hooks/pkg/quay"
+	"github.com/bigkevmcd/image-hooks/pkg/handlers/client"
+	"github.com/bigkevmcd/image-hooks/pkg/handlers/config"
+	"github.com/bigkevmcd/image-hooks/pkg/hooks/quay"
 	"github.com/bigkevmcd/image-hooks/pkg/syaml"
 	"github.com/jenkins-x/go-scm/scm"
 )
@@ -36,18 +36,17 @@ func (u *Updater) Update(ctx context.Context, h *quay.RepositoryPushHook) error 
 		u.log.Infow("failed to find repo", "name", h.Repository)
 		return nil
 	}
-	u.log.Infow("found repo", "name", h.Repository, "dockerURL", h.DockerURL, "tag", h.UpdatedTags[0])
-	return u.UpdateRepository(ctx, cfg, h.Repository, h.DockerURL, h.UpdatedTags[0])
+	u.log.Infow("found repo", "name", h.Repository, "newURL", h.PushedImageURL())
+	return u.UpdateRepository(ctx, cfg, h.Repository, h.PushedImageURL())
 }
 
-func (u *Updater) UpdateRepository(ctx context.Context, cfg *config.Repository, repository, dockerURL, tag string) error {
+func (u *Updater) UpdateRepository(ctx context.Context, cfg *config.Repository, repository, newURL string) error {
 	current, err := u.gitClient.GetFile(ctx, cfg.SourceRepo, cfg.SourceBranch, cfg.FilePath)
 	if err != nil {
 		u.log.Errorw("failed to get file from repo", "error", err)
 		return err
 	}
 	u.log.Infow("got existing file", "sha", current.Sha)
-	newURL := fmt.Sprintf("%s:%s", dockerURL, tag)
 
 	u.log.Infow("new image reference", "image", newURL)
 	updated, err := syaml.SetBytes(current.Data, cfg.UpdateKey, newURL)

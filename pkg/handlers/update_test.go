@@ -1,4 +1,4 @@
-package hook
+package handlers
 
 import (
 	"context"
@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bigkevmcd/image-hooks/pkg/hook/client/mock"
-	"github.com/bigkevmcd/image-hooks/pkg/hook/config"
-	"github.com/bigkevmcd/image-hooks/pkg/quay"
+	"github.com/bigkevmcd/image-hooks/pkg/handlers/client/mock"
+	"github.com/bigkevmcd/image-hooks/pkg/handlers/config"
+	"github.com/bigkevmcd/image-hooks/pkg/hooks/quay"
 	"github.com/jenkins-x/go-scm/scm"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
