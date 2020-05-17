@@ -71,6 +71,20 @@ func TestPushedImageURL(t *testing.T) {
 	}
 }
 
+func TestEventRepository(t *testing.T) {
+	hook := &RepositoryPushHook{
+		Repository:  "mynamespace/repository",
+		Name:        "repository",
+		DockerURL:   "quay.io/mynamespace/repository",
+		UpdatedTags: []string{"latest"},
+	}
+	want := "mynamespace/repository"
+
+	if u := hook.EventRepository(); u != want {
+		t.Fatalf("got %s, want %s", u, want)
+	}
+}
+
 func makeHookRequest(t *testing.T, fixture string) *http.Request {
 	t.Helper()
 	b, err := ioutil.ReadFile(fixture)

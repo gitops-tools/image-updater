@@ -15,7 +15,7 @@ func ParseRequest(req *http.Request) (hooks.PushEvent, error) {
 	if err != nil {
 		return nil, err
 	}
-	h := &WebhookEvent{}
+	h := &Webhook{}
 	err = json.Unmarshal(data, h)
 	if err != nil {
 		return nil, err
@@ -23,14 +23,18 @@ func ParseRequest(req *http.Request) (hooks.PushEvent, error) {
 	return h, nil
 }
 
-type WebhookEvent struct {
+type Webhook struct {
 	CallbackURL string      `json:"callback_url"`
 	PushData    *PushData   `json:"push_data"`
 	Repository  *Repository `json:"repository"`
 }
 
-func (p WebhookEvent) PushedImageURL() string {
+func (p Webhook) PushedImageURL() string {
 	return fmt.Sprintf("%s:%s", p.Repository.RepoName, p.PushData.Tag)
+}
+
+func (p Webhook) EventRepository() string {
+	return p.Repository.RepoName
 }
 
 type PushData struct {

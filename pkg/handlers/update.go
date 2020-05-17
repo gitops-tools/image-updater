@@ -6,7 +6,7 @@ import (
 
 	"github.com/bigkevmcd/image-hooks/pkg/handlers/client"
 	"github.com/bigkevmcd/image-hooks/pkg/handlers/config"
-	"github.com/bigkevmcd/image-hooks/pkg/hooks/quay"
+	"github.com/bigkevmcd/image-hooks/pkg/hooks"
 	"github.com/bigkevmcd/image-hooks/pkg/syaml"
 	"github.com/jenkins-x/go-scm/scm"
 )
@@ -30,14 +30,14 @@ type Updater struct {
 	log           logger
 }
 
-func (u *Updater) Update(ctx context.Context, h *quay.RepositoryPushHook) error {
-	cfg := u.configs.Find(h.Repository)
+func (u *Updater) Update(ctx context.Context, h hooks.PushEvent) error {
+	cfg := u.configs.Find(h.EventRepository())
 	if cfg == nil {
-		u.log.Infow("failed to find repo", "name", h.Repository)
+		u.log.Infow("failed to find repo", "name", h.EventRepository())
 		return nil
 	}
-	u.log.Infow("found repo", "name", h.Repository, "newURL", h.PushedImageURL())
-	return u.UpdateRepository(ctx, cfg, h.Repository, h.PushedImageURL())
+	u.log.Infow("found repo", "name", h.EventRepository(), "newURL", h.PushedImageURL())
+	return u.UpdateRepository(ctx, cfg, h.EventRepository(), h.PushedImageURL())
 }
 
 func (u *Updater) UpdateRepository(ctx context.Context, cfg *config.Repository, repository, newURL string) error {

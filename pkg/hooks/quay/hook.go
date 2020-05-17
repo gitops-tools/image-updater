@@ -35,3 +35,7 @@ type RepositoryPushHook struct {
 func (p RepositoryPushHook) PushedImageURL() string {
 	return fmt.Sprintf("%s:%s", p.DockerURL, p.UpdatedTags[0])
 }
+
+func (p RepositoryPushHook) EventRepository() string {
+	return p.Repository
+}

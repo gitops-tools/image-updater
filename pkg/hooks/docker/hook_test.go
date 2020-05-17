@@ -13,7 +13,7 @@ import (
 	"github.com/bigkevmcd/image-hooks/pkg/hooks"
 )
 
-var _ hooks.PushEvent = (*WebhookEvent)(nil)
+var _ hooks.PushEvent = (*Webhook)(nil)
 var _ hooks.PushEventParser = ParseRequest
 
 func TestParseRequest(t *testing.T) {
@@ -24,7 +24,7 @@ func TestParseRequest(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want := &WebhookEvent{
+	want := &Webhook{
 		CallbackURL: "https://registry.hub.docker.com/u/svendowideit/testhook/hook/2141b5bi5i5b02bec211i4eeih0242eg11000a/",
 		PushData: &PushData{
 			Pusher: "trustedbuilder",
@@ -78,7 +78,7 @@ func TestParseRequestWithUnparseableBody(t *testing.T) {
 }
 
 func TestPushedImageURL(t *testing.T) {
-	hook := &WebhookEvent{
+	hook := &Webhook{
 		PushData: &PushData{
 			Tag: "latest",
 		},
@@ -89,6 +89,22 @@ func TestPushedImageURL(t *testing.T) {
 	want := "mynamespace/repository:latest"
 
 	if u := hook.PushedImageURL(); u != want {
+		t.Fatalf("got %s, want %s", u, want)
+	}
+}
+
+func TestRepository(t *testing.T) {
+	hook := &Webhook{
+		PushData: &PushData{
+			Tag: "latest",
+		},
+		Repository: &Repository{
+			RepoName: "mynamespace/repository",
+		},
+	}
+	want := "mynamespace/repository"
+
+	if u := hook.EventRepository(); u != want {
 		t.Fatalf("got %s, want %s", u, want)
 	}
 }

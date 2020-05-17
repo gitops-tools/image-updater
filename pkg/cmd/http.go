@@ -8,6 +8,7 @@ import (
 	"github.com/bigkevmcd/image-hooks/pkg/handlers"
 	"github.com/bigkevmcd/image-hooks/pkg/handlers/client"
 	"github.com/bigkevmcd/image-hooks/pkg/handlers/config"
+	"github.com/bigkevmcd/image-hooks/pkg/hooks/quay"
 	"github.com/jenkins-x/go-scm/scm/factory"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -39,7 +40,7 @@ func makeHTTPCmd() *cobra.Command {
 			repos, err := config.Parse(f)
 
 			updater := handlers.New(sugar, client.New(scmClient), repos)
-			handler := handlers.NewHandler(sugar, updater)
+			handler := handlers.NewHandler(sugar, updater, quay.ParseRequest)
 			http.Handle("/", handler)
 			listen := fmt.Sprintf(":%d", viper.GetInt("port"))
 			sugar.Infow("quay-hooks http starting", "port", viper.GetInt("port"))

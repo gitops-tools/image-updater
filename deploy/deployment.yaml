@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: image-hooks-http
-          image: quay.io/bigkevmcd/image-hooks
+          image: bigkevmcd/image-hooks:v0.0.1
           imagePullPolicy: Always
           volumeMounts:
           - name: config-volume

@@ -5,17 +5,18 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/bigkevmcd/image-hooks/pkg/hooks/quay"
+	"github.com/bigkevmcd/image-hooks/pkg/hooks"
 )
 
 type Handler struct {
 	log     *zap.SugaredLogger
 	updater *Updater
+	parser  hooks.PushEventParser
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.log.Infow("processing hook request")
-	hook, err := quay.ParseRepositoryPush(r)
+	hook, err := h.parser(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -28,6 +29,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewHandler(logger *zap.SugaredLogger, u *Updater) *Handler {
-	return &Handler{log: logger, updater: u}
+func NewHandler(logger *zap.SugaredLogger, u *Updater, p hooks.PushEventParser) *Handler {
+	return &Handler{log: logger, updater: u, parser: p}
 }
