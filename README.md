@@ -38,6 +38,11 @@ with the incoming image.
 A new branch will be created based on the `branchGenerateName` field, which
 would look something like `repo-imager-kXzdf`.
 
+## Updating the sourceBranch directly
+
+If no value is provided for `branchGenerateName`, then the `sourceBranch` will
+be updated directly.
+
 ### Creating the configuration
 
 The tool reads a YAML definition, which by default is mounted in from a

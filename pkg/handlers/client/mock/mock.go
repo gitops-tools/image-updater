@@ -152,6 +152,21 @@ func (m *MockClient) RefutePullRequestCreated(repo string, inp *scm.PullRequestI
 	}
 }
 
+// AssertNoBranchesCreated fails if a branch was created.
+func (m *MockClient) AssertNoBranchesCreated() {
+	if l := len(m.createdBranches); l > 0 {
+		m.t.Fatalf("expected no branches to be created: got %d", l)
+	}
+
+}
+
+// AssertNoPullRequestsCreated fails if a PR was created.
+func (m *MockClient) AssertNoPullRequestsCreated() {
+	if l := len(m.createdPullRequests); l > 0 {
+		m.t.Fatalf("expected no PullRequests to be created: got %d", l)
+	}
+}
+
 func key(s ...string) string {
 	return strings.Join(s, ":")
 }

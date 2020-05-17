@@ -81,6 +81,37 @@ func TestUpdaterWithKnownRepo(t *testing.T) {
 	})
 }
 
+// With no name-generator, the change should be made to master directly, rather
+// than going through a PullRequest.
+func TestUpdaterWithNoNameGenerator(t *testing.T) {
+	sourceBranch := "production"
+	testSHA := "980a0d5f19a64b4b30a87d4206aade58726b60e3"
+	m := mock.New(t)
+	m.AddFileContents(testGitHubRepo, testFilePath, sourceBranch, []byte("test:\n  image: old-image\n"))
+	m.AddBranchHead(testGitHubRepo, sourceBranch, testSHA)
+	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)).Sugar()
+
+	configs := createConfigs()
+	configs.Repositories[0].BranchGenerateName = ""
+	configs.Repositories[0].SourceBranch = sourceBranch
+	updater := New(logger, m, configs)
+	updater.nameGenerator = stubNameGenerator{"a"}
+	hook := createHook()
+
+	err := updater.Update(context.Background(), hook)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	updated := m.GetUpdatedContents(testGitHubRepo, testFilePath, sourceBranch)
+	want := "test:\n  image: quay.io/testorg/repo:production\n"
+	if s := string(updated); s != want {
+		t.Fatalf("update failed, got %#v, want %#v", s, want)
+	}
+	m.AssertNoBranchesCreated()
+	m.AssertNoPullRequestsCreated()
+}
+
 func TestUpdaterWithMissingFile(t *testing.T) {
 	testSHA := "980a0d5f19a64b4b30a87d4206aade58726b60e3"
 	m := mock.New(t)
@@ -103,13 +134,8 @@ func TestUpdaterWithMissingFile(t *testing.T) {
 	if s := string(updated); s != "" {
 		t.Fatalf("update failed, got %#v, want %#v", s, "")
 	}
-	m.RefuteBranchCreated(testGitHubRepo, "test-branch-a", testSHA)
-	m.RefutePullRequestCreated(testGitHubRepo, &scm.PullRequestInput{
-		Title: fmt.Sprintf("Image %s updated", testQuayRepo),
-		Body:  "Automated Image Update",
-		Head:  "test-branch-a",
-		Base:  "master",
-	})
+	m.AssertNoBranchesCreated()
+	m.AssertNoPullRequestsCreated()
 }
 
 func TestUpdaterWithBranchCreationFailure(t *testing.T) {
@@ -134,13 +160,8 @@ func TestUpdaterWithBranchCreationFailure(t *testing.T) {
 	if s := string(updated); s != "" {
 		t.Fatalf("update failed, got %#v, want %#v", s, "")
 	}
-	m.RefuteBranchCreated(testGitHubRepo, "test-branch-a", testSHA)
-	m.RefutePullRequestCreated(testGitHubRepo, &scm.PullRequestInput{
-		Title: fmt.Sprintf("Image %s updated", testQuayRepo),
-		Body:  "Automated Image Update",
-		Head:  "test-branch-a",
-		Base:  "master",
-	})
+	m.AssertNoBranchesCreated()
+	m.AssertNoPullRequestsCreated()
 }
 
 func TestUpdaterWithUpdateFileFailure(t *testing.T) {

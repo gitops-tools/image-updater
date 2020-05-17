@@ -52,19 +52,40 @@ func (u *Updater) UpdateRepository(ctx context.Context, cfg *config.Repository, 
 	updated, err := syaml.SetBytes(current.Data, cfg.UpdateKey, newURL)
 
 	masterRef, err := u.gitClient.GetBranchHead(ctx, cfg.SourceRepo, cfg.SourceBranch)
-	newBranchName := u.nameGenerator.prefixedName(cfg.BranchGenerateName)
-	err = u.gitClient.CreateBranch(ctx, cfg.SourceRepo, newBranchName, masterRef)
 	if err != nil {
-		return fmt.Errorf("failed to create branch: %w", err)
+		return fmt.Errorf("failed to get branch head: %v", err)
 	}
-	u.log.Infow("created branch", "branch", newBranchName, "ref", masterRef)
-
+	newBranchName, err := u.createBranchIfNecessary(ctx, cfg, masterRef)
+	if err != nil {
+		return err
+	}
 	err = u.gitClient.UpdateFile(ctx, cfg.SourceRepo, newBranchName, cfg.FilePath, "Automatic update because an image was updated", current.Sha, updated)
 	if err != nil {
 		return fmt.Errorf("failed to update file: %w", err)
 	}
 	u.log.Infow("updated file", "filename", cfg.FilePath)
+	return u.createPRIfNecessary(ctx, cfg, newBranchName, repository)
+}
 
+func (u *Updater) createBranchIfNecessary(ctx context.Context, cfg *config.Repository, masterRef string) (string, error) {
+	if cfg.BranchGenerateName == "" {
+		u.log.Infow("no branchGenerateName configured, reusing source branch", "branch", cfg.SourceBranch)
+		return cfg.SourceBranch, nil
+	}
+
+	newBranchName := u.nameGenerator.prefixedName(cfg.BranchGenerateName)
+	err := u.gitClient.CreateBranch(ctx, cfg.SourceRepo, newBranchName, masterRef)
+	if err != nil {
+		return "", fmt.Errorf("failed to create branch: %w", err)
+	}
+	u.log.Infow("created branch", "branch", newBranchName, "ref", masterRef)
+	return newBranchName, nil
+}
+
+func (u *Updater) createPRIfNecessary(ctx context.Context, cfg *config.Repository, newBranchName, repository string) error {
+	if cfg.SourceBranch == newBranchName {
+		return nil
+	}
 	pr, err := u.gitClient.CreatePullRequest(ctx, cfg.SourceRepo, &scm.PullRequestInput{
 		Title: fmt.Sprintf("Image %s updated", repository),
 		Body:  "Automated Image Update",
