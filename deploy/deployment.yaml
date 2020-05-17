@@ -15,8 +15,9 @@ spec:
     spec:
       containers:
         - name: image-hooks-http
-          image: bigkevmcd/image-hooks:v0.0.1
+          image: bigkevmcd/image-hooks:latest
           imagePullPolicy: Always
+          args: ["http", "--parser", "docker"]
           volumeMounts:
           - name: config-volume
             mountPath: /etc/image-hooks

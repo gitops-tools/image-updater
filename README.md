@@ -1,6 +1,9 @@
 # image-hooks ![Go](https://github.com/bigkevmcd/image-hooks/workflows/Go/badge.svg)
 
-A micro-service for updating Git Repos when a Quay image hook is received.
+A micro-service for updating Git Repos when a hook is received indicating that a
+new image has been pushed from an image repository.
+
+This supports receiving hooks from Docker and Quay.io.
 
 ## WARNING
 
@@ -54,6 +57,11 @@ $ kubectl create secret generic image-hooks-secret --from-literal=token=$GITHUB_
 A Kubernetes `Deployment` is provided in [./deploy/deployment.yaml](./deploy/deployment.yaml).
 
 The service is not dependent on being executed within a Kubernetes cluster.
+
+## Choosing a hook parser
+
+By default, this accepts hooks from Docker hub but the deployment can easily be
+changed to support Quay.io.
 
 ## Exposing the Handler
 

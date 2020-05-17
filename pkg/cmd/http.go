@@ -5,14 +5,17 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/bigkevmcd/image-hooks/pkg/handlers"
-	"github.com/bigkevmcd/image-hooks/pkg/handlers/client"
-	"github.com/bigkevmcd/image-hooks/pkg/handlers/config"
-	"github.com/bigkevmcd/image-hooks/pkg/hooks/quay"
 	"github.com/jenkins-x/go-scm/scm/factory"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+
+	"github.com/bigkevmcd/image-hooks/pkg/handlers"
+	"github.com/bigkevmcd/image-hooks/pkg/handlers/client"
+	"github.com/bigkevmcd/image-hooks/pkg/handlers/config"
+	"github.com/bigkevmcd/image-hooks/pkg/hooks"
+	"github.com/bigkevmcd/image-hooks/pkg/hooks/docker"
+	"github.com/bigkevmcd/image-hooks/pkg/hooks/quay"
 )
 
 func makeHTTPCmd() *cobra.Command {
@@ -40,10 +43,14 @@ func makeHTTPCmd() *cobra.Command {
 			repos, err := config.Parse(f)
 
 			updater := handlers.New(sugar, client.New(scmClient), repos)
-			handler := handlers.NewHandler(sugar, updater, quay.Parse)
+			p, err := parser()
+			if err != nil {
+				return err
+			}
+			handler := handlers.NewHandler(sugar, updater, p)
 			http.Handle("/", handler)
 			listen := fmt.Sprintf(":%d", viper.GetInt("port"))
-			sugar.Infow("quay-hooks http starting", "port", viper.GetInt("port"))
+			sugar.Infow("quay-hooks http starting", "port", viper.GetInt("port"), "parser", viper.GetString("parser"))
 			return http.ListenAndServe(listen, nil)
 		},
 	}
@@ -63,6 +70,13 @@ func makeHTTPCmd() *cobra.Command {
 	logIfError(viper.BindPFlag("driver", cmd.Flags().Lookup("driver")))
 
 	cmd.Flags().String(
+		"parser",
+		"quay",
+		"what driver to use to parse incoming webhooks e.g. quay, docker",
+	)
+	logIfError(viper.BindPFlag("parser", cmd.Flags().Lookup("parser")))
+
+	cmd.Flags().String(
 		"config",
 		"/etc/image-hooks/config.yaml",
 		"repository configuration",
@@ -73,4 +87,15 @@ func makeHTTPCmd() *cobra.Command {
 
 func githubToken() string {
 	return os.Getenv("GITHUB_TOKEN")
+}
+
+func parser() (hooks.PushEventParser, error) {
+	switch viper.GetString("parser") {
+	case "quay":
+		return quay.Parse, nil
+	case "docker":
+		return docker.Parse, nil
+	default:
+		return nil, fmt.Errorf("unknown parser: %s", viper.GetString("parser"))
+	}
 }

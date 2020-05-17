@@ -7,4 +7,4 @@ FROM registry.access.redhat.com/ubi8/ubi-minimal
 WORKDIR /root/
 COPY --from=build /go/src/image-hooks .
 EXPOSE 8080
-CMD ["./image-hooks", "http"]
+ENTRYPOINT ["./image-hooks", "http"]
