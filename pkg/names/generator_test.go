@@ -1,4 +1,4 @@
-package handlers
+package names
 
 import (
 	"math/rand"
@@ -6,9 +6,9 @@ import (
 )
 
 func TestGenerator(t *testing.T) {
-	g := randomNameGenerator{rand: rand.New(rand.NewSource(100))}
+	g := RandomGenerator{rand: rand.New(rand.NewSource(100))}
 
-	name := g.prefixedName("testing-")
+	name := g.PrefixedName("testing-")
 
 	if name != "testing-DlPsU" {
 		t.Fatalf("got %v, want %v", name, "testing-DlPsU")

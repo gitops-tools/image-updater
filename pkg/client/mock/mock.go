@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bigkevmcd/image-hooks/pkg/handlers/client"
+	"github.com/bigkevmcd/image-hooks/pkg/client"
 	"github.com/jenkins-x/go-scm/scm"
 )
 
@@ -173,7 +173,7 @@ func key(s ...string) string {
 
 func bytesSha1(b []byte) string {
 	h := sha1.New()
-	h.Write([]byte(b))
+	_, _ = h.Write([]byte(b))
 	bs := h.Sum(nil)
 	return fmt.Sprintf("%x", bs)
 }

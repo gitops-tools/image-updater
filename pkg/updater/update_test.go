@@ -1,4 +1,4 @@
-package handlers
+package updater
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bigkevmcd/image-hooks/pkg/handlers/client/mock"
-	"github.com/bigkevmcd/image-hooks/pkg/handlers/config"
+	"github.com/bigkevmcd/image-hooks/pkg/client/mock"
+	"github.com/bigkevmcd/image-hooks/pkg/config"
 	"github.com/bigkevmcd/image-hooks/pkg/hooks/quay"
 	"github.com/jenkins-x/go-scm/scm"
 	"go.uber.org/zap"
@@ -254,6 +254,6 @@ type stubNameGenerator struct {
 	name string
 }
 
-func (s stubNameGenerator) prefixedName(p string) string {
+func (s stubNameGenerator) PrefixedName(p string) string {
 	return p + s.name
 }

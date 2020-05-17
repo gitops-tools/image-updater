@@ -13,7 +13,7 @@ type Repository struct {
 	Name               string `json:"name"`
 	SourceRepo         string `json:"sourceRepo"`
 	SourceBranch       string `json:"sourceBranch"`
-	FilePath           string `json:"filePath`
+	FilePath           string `json:"filePath"`
 	UpdateKey          string `json:"updateKey"`
 	BranchGenerateName string `json:"branchGenerateName"`
 }

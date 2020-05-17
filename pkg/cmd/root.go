@@ -23,6 +23,7 @@ func makeRootCmd() *cobra.Command {
 		Short: "Handle Quay.io hook notifications",
 	}
 	cmd.AddCommand(makeHTTPCmd())
+	cmd.AddCommand(makeUpdateCmd())
 	return cmd
 }
 

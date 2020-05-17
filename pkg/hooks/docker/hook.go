@@ -58,6 +58,6 @@ type Repository struct {
 	IsPrivate       bool    `json:"is_private"`
 	IsTrusted       bool    `json:"is_trusted"`
 	DateCreated     float64 `json:"date_created"`
-	StarCount       int64   `star_count"`
+	StarCount       int64   `json:"star_count"`
 	CommentCount    int64   `json:"comment_count"`
 }

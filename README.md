@@ -1,5 +1,13 @@
 # image-hooks ![Go](https://github.com/bigkevmcd/image-hooks/workflows/Go/badge.svg)
 
+## Command-line tool
+
+```shell
+$ ./image-hooks update --file-path service-a/person.yaml --image-repo quay.io/myorg/my-image --source-repo mysource/my-repo --new-image-url quay.io/myorg/my-image:v1.1.0 --update-key person.name
+```
+
+## Webhook Service
+
 A micro-service for updating Git Repos when a hook is received indicating that a
 new image has been pushed from an image repository.
 

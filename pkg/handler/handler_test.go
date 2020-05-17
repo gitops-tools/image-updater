@@ -1,4 +1,4 @@
-package handlers
+package handler
 
 import (
 	"bytes"
@@ -11,10 +11,18 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
 
-	"github.com/bigkevmcd/image-hooks/pkg/handlers/client/mock"
+	"github.com/bigkevmcd/image-hooks/pkg/client/mock"
+	"github.com/bigkevmcd/image-hooks/pkg/config"
 	"github.com/bigkevmcd/image-hooks/pkg/hooks"
 	"github.com/bigkevmcd/image-hooks/pkg/hooks/quay"
+	"github.com/bigkevmcd/image-hooks/pkg/updater"
 	"github.com/jenkins-x/go-scm/scm"
+)
+
+const (
+	testQuayRepo   = "mynamespace/repository"
+	testGitHubRepo = "testorg/testrepo"
+	testFilePath   = "environments/test/services/service-a/test.yaml"
 )
 
 func TestHandler(t *testing.T) {
@@ -23,9 +31,8 @@ func TestHandler(t *testing.T) {
 	m := mock.New(t)
 	m.AddFileContents(testGitHubRepo, testFilePath, "master", []byte("test:\n  image: old-image\n"))
 	m.AddBranchHead(testGitHubRepo, "master", testSHA)
-	updater := New(logger.Sugar(), m, createConfigs())
-	updater.nameGenerator = stubNameGenerator{"a"}
-	h := NewHandler(logger.Sugar(), updater, quay.Parse)
+	updater := updater.New(logger.Sugar(), m, createConfigs(), updater.NameGenerator(stubNameGenerator{"a"}))
+	h := New(logger.Sugar(), updater, quay.Parse)
 	rec := httptest.NewRecorder()
 	req := makeHookRequest(t, "testdata/push_hook.json")
 
@@ -46,9 +53,8 @@ func TestHandlerWithParseFailure(t *testing.T) {
 
 	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel))
 	m := mock.New(t)
-	updater := New(logger.Sugar(), m, createConfigs())
-	updater.nameGenerator = stubNameGenerator{"a"}
-	h := NewHandler(logger.Sugar(), updater, badParser)
+	updater := updater.New(logger.Sugar(), m, createConfigs(), updater.NameGenerator(stubNameGenerator{"a"}))
+	h := New(logger.Sugar(), updater, badParser)
 	rec := httptest.NewRecorder()
 	req := makeHookRequest(t, "testdata/push_hook.json")
 
@@ -69,9 +75,8 @@ func TestHandlerWithParseFailure(t *testing.T) {
 func TestHandlerWithFailureToUpdate(t *testing.T) {
 	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel))
 	m := mock.New(t)
-	updater := New(logger.Sugar(), m, createConfigs())
-	updater.nameGenerator = stubNameGenerator{"a"}
-	h := NewHandler(logger.Sugar(), updater, quay.Parse)
+	updater := updater.New(logger.Sugar(), m, createConfigs(), updater.NameGenerator(stubNameGenerator{"a"}))
+	h := New(logger.Sugar(), updater, quay.Parse)
 	rec := httptest.NewRecorder()
 	req := makeHookRequest(t, "testdata/push_hook.json")
 
@@ -98,4 +103,27 @@ func makeHookRequest(t *testing.T, fixture string) *http.Request {
 	req := httptest.NewRequest("POST", "/", bytes.NewReader(b))
 	req.Header.Add("Content-Type", "application/json")
 	return req
+}
+
+func createConfigs() *config.RepoConfiguration {
+	return &config.RepoConfiguration{
+		Repositories: []*config.Repository{
+			{
+				Name:               testQuayRepo,
+				SourceRepo:         testGitHubRepo,
+				SourceBranch:       "master",
+				FilePath:           testFilePath,
+				UpdateKey:          "test.image",
+				BranchGenerateName: "test-branch-",
+			},
+		},
+	}
+}
+
+type stubNameGenerator struct {
+	name string
+}
+
+func (s stubNameGenerator) PrefixedName(p string) string {
+	return p + s.name
 }

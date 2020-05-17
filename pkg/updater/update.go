@@ -1,24 +1,42 @@
-package handlers
+package updater
 
 import (
 	"context"
 	"fmt"
+	"math/rand"
+	"time"
 
-	"github.com/bigkevmcd/image-hooks/pkg/handlers/client"
-	"github.com/bigkevmcd/image-hooks/pkg/handlers/config"
+	"github.com/bigkevmcd/image-hooks/pkg/client"
+	"github.com/bigkevmcd/image-hooks/pkg/config"
 	"github.com/bigkevmcd/image-hooks/pkg/hooks"
+	"github.com/bigkevmcd/image-hooks/pkg/names"
 	"github.com/bigkevmcd/image-hooks/pkg/syaml"
 	"github.com/jenkins-x/go-scm/scm"
 )
+
+var timeSeed = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 type logger interface {
 	Infow(msg string, keysAndValues ...interface{})
 	Errorw(msg string, keysAndValues ...interface{})
 }
 
+type updaterFunc func(u *Updater)
+
+// NameGenerator is an option func for the Updater creation function.
+func NameGenerator(g names.Generator) updaterFunc {
+	return func(u *Updater) {
+		u.nameGenerator = g
+	}
+}
+
 // New creates and returns a new Updater.
-func New(l logger, c client.GitClient, cfgs *config.RepoConfiguration) *Updater {
-	return &Updater{gitClient: c, configs: cfgs, nameGenerator: randomNameGenerator{timeSeed}, log: l}
+func New(l logger, c client.GitClient, cfgs *config.RepoConfiguration, opts ...updaterFunc) *Updater {
+	u := &Updater{gitClient: c, configs: cfgs, nameGenerator: names.New(timeSeed), log: l}
+	for _, o := range opts {
+		o(u)
+	}
+	return u
 }
 
 // Updater can update a Git repo with an updated version of a file based on a
@@ -26,7 +44,7 @@ func New(l logger, c client.GitClient, cfgs *config.RepoConfiguration) *Updater 
 type Updater struct {
 	configs       *config.RepoConfiguration
 	gitClient     client.GitClient
-	nameGenerator nameGenerator
+	nameGenerator names.Generator
 	log           logger
 }
 
@@ -37,10 +55,10 @@ func (u *Updater) Update(ctx context.Context, h hooks.PushEvent) error {
 		return nil
 	}
 	u.log.Infow("found repo", "name", h.EventRepository(), "newURL", h.PushedImageURL())
-	return u.UpdateRepository(ctx, cfg, h.EventRepository(), h.PushedImageURL())
+	return u.UpdateRepository(ctx, cfg, h.PushedImageURL())
 }
 
-func (u *Updater) UpdateRepository(ctx context.Context, cfg *config.Repository, repository, newURL string) error {
+func (u *Updater) UpdateRepository(ctx context.Context, cfg *config.Repository, newURL string) error {
 	current, err := u.gitClient.GetFile(ctx, cfg.SourceRepo, cfg.SourceBranch, cfg.FilePath)
 	if err != nil {
 		u.log.Errorw("failed to get file from repo", "error", err)
@@ -50,7 +68,9 @@ func (u *Updater) UpdateRepository(ctx context.Context, cfg *config.Repository, 
 
 	u.log.Infow("new image reference", "image", newURL)
 	updated, err := syaml.SetBytes(current.Data, cfg.UpdateKey, newURL)
-
+	if err != nil {
+		return err
+	}
 	masterRef, err := u.gitClient.GetBranchHead(ctx, cfg.SourceRepo, cfg.SourceBranch)
 	if err != nil {
 		return fmt.Errorf("failed to get branch head: %v", err)
@@ -64,7 +84,7 @@ func (u *Updater) UpdateRepository(ctx context.Context, cfg *config.Repository, 
 		return fmt.Errorf("failed to update file: %w", err)
 	}
 	u.log.Infow("updated file", "filename", cfg.FilePath)
-	return u.createPRIfNecessary(ctx, cfg, newBranchName, repository)
+	return u.createPRIfNecessary(ctx, cfg, newBranchName, cfg.Name)
 }
 
 func (u *Updater) createBranchIfNecessary(ctx context.Context, cfg *config.Repository, masterRef string) (string, error) {
@@ -73,7 +93,7 @@ func (u *Updater) createBranchIfNecessary(ctx context.Context, cfg *config.Repos
 		return cfg.SourceBranch, nil
 	}
 
-	newBranchName := u.nameGenerator.prefixedName(cfg.BranchGenerateName)
+	newBranchName := u.nameGenerator.PrefixedName(cfg.BranchGenerateName)
 	err := u.gitClient.CreateBranch(ctx, cfg.SourceRepo, newBranchName, masterRef)
 	if err != nil {
 		return "", fmt.Errorf("failed to create branch: %w", err)

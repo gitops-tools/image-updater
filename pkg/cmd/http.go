@@ -10,12 +10,13 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
-	"github.com/bigkevmcd/image-hooks/pkg/handlers"
-	"github.com/bigkevmcd/image-hooks/pkg/handlers/client"
-	"github.com/bigkevmcd/image-hooks/pkg/handlers/config"
+	"github.com/bigkevmcd/image-hooks/pkg/client"
+	"github.com/bigkevmcd/image-hooks/pkg/config"
+	"github.com/bigkevmcd/image-hooks/pkg/handler"
 	"github.com/bigkevmcd/image-hooks/pkg/hooks"
 	"github.com/bigkevmcd/image-hooks/pkg/hooks/docker"
 	"github.com/bigkevmcd/image-hooks/pkg/hooks/quay"
+	"github.com/bigkevmcd/image-hooks/pkg/updater"
 )
 
 func makeHTTPCmd() *cobra.Command {
@@ -41,13 +42,15 @@ func makeHTTPCmd() *cobra.Command {
 			}
 			defer f.Close()
 			repos, err := config.Parse(f)
-
-			updater := handlers.New(sugar, client.New(scmClient), repos)
+			if err != nil {
+				return err
+			}
+			updater := updater.New(sugar, client.New(scmClient), repos)
 			p, err := parser()
 			if err != nil {
 				return err
 			}
-			handler := handlers.NewHandler(sugar, updater, p)
+			handler := handler.New(sugar, updater, p)
 			http.Handle("/", handler)
 			listen := fmt.Sprintf(":%d", viper.GetInt("port"))
 			sugar.Infow("quay-hooks http starting", "port", viper.GetInt("port"), "parser", viper.GetString("parser"))

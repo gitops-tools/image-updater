@@ -1,4 +1,4 @@
-package handlers
+package handler
 
 import (
 	"net/http"
@@ -6,11 +6,13 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/bigkevmcd/image-hooks/pkg/hooks"
+	"github.com/bigkevmcd/image-hooks/pkg/updater"
 )
 
+// Handler parses and processes hook notifications.
 type Handler struct {
 	log     *zap.SugaredLogger
-	updater *Updater
+	updater *updater.Updater
 	parser  hooks.PushEventParser
 }
 
@@ -32,6 +34,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewHandler(logger *zap.SugaredLogger, u *Updater, p hooks.PushEventParser) *Handler {
+// New creates and returns a new Handler.
+func New(logger *zap.SugaredLogger, u *updater.Updater, p hooks.PushEventParser) *Handler {
 	return &Handler{log: logger, updater: u, parser: p}
 }
