@@ -13,12 +13,12 @@ import (
 )
 
 var _ hooks.PushEvent = (*RepositoryPushHook)(nil)
-var _ hooks.PushEventParser = ParseRequest
+var _ hooks.PushEventParser = Parse
 
-func TestParseRequest(t *testing.T) {
+func TestParse(t *testing.T) {
 	req := makeHookRequest(t, "testdata/push_hook.json")
 
-	hook, err := ParseRequest(req)
+	hook, err := Parse(req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,22 +36,22 @@ func TestParseRequest(t *testing.T) {
 	}
 }
 
-func TestParseRequestWithNoBody(t *testing.T) {
+func TestParseWithNoBody(t *testing.T) {
 	bodyErr := errors.New("just a test error")
 
 	req := httptest.NewRequest("POST", "/", failingReader{err: bodyErr})
 
-	_, err := ParseRequest(req)
+	_, err := Parse(req)
 	if err != bodyErr {
 		t.Fatal("expected an error")
 	}
 
 }
 
-func TestParseRequestWithUnparseableBody(t *testing.T) {
+func TestParseWithUnparseableBody(t *testing.T) {
 	req := httptest.NewRequest("POST", "/", nil)
 
-	_, err := ParseRequest(req)
+	_, err := Parse(req)
 
 	if err == nil {
 		t.Fatal("expected an error")

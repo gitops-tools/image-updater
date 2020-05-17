@@ -50,7 +50,7 @@ func (m *MockClient) GetFile(ctx context.Context, repo, ref, path string) (*scm.
 	if b, ok := m.files[key(repo, path, ref)]; ok {
 		return &scm.Content{Data: b, Sha: bytesSha1(b)}, nil
 	}
-	return nil, nil
+	return nil, errors.New("not found")
 }
 
 // UpdateFile implements the client.GitClient interface.
@@ -116,6 +116,7 @@ func (m *MockClient) AddBranchHead(repo, branch, sha string) {
 // AssertBranchCreated fails if no matching branch was created using
 // CreateBranch.
 func (m *MockClient) AssertBranchCreated(repo, branch, sha string) {
+	m.t.Helper()
 	if _, ok := m.createdBranches[key(repo, branch, sha)]; !ok {
 		m.t.Fatalf("branch %s not created in repo %s from sha %s", branch, repo, sha)
 	}
@@ -124,6 +125,7 @@ func (m *MockClient) AssertBranchCreated(repo, branch, sha string) {
 // RefuteBranchCreated fails if a matching branch was created using
 // CreateBranch.
 func (m *MockClient) RefuteBranchCreated(repo, branch, sha string) {
+	m.t.Helper()
 	if _, ok := m.createdBranches[key(repo, branch, sha)]; ok {
 		m.t.Fatalf("branch %s was created in repo %s from sha %s", branch, repo, sha)
 	}
@@ -131,6 +133,7 @@ func (m *MockClient) RefuteBranchCreated(repo, branch, sha string) {
 
 // AssertPullRequestCreated fails if no matching PullRequest was created.
 func (m *MockClient) AssertPullRequestCreated(repo string, inp *scm.PullRequestInput) {
+	m.t.Helper()
 	for _, pr := range m.createdPullRequests[repo] {
 		if reflect.DeepEqual(inp, pr) {
 			return
@@ -141,6 +144,7 @@ func (m *MockClient) AssertPullRequestCreated(repo string, inp *scm.PullRequestI
 
 // RefutePullRequestCreated fails if matching PullRequest was created.
 func (m *MockClient) RefutePullRequestCreated(repo string, inp *scm.PullRequestInput) {
+	m.t.Helper()
 	for _, pr := range m.createdPullRequests[repo] {
 		if reflect.DeepEqual(inp, pr) {
 			m.t.Fatalf("pullrequest was created in repo %s", repo)

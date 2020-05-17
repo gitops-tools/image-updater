@@ -9,7 +9,7 @@ import (
 	"github.com/bigkevmcd/image-hooks/pkg/hooks"
 )
 
-func ParseRequest(req *http.Request) (hooks.PushEvent, error) {
+func Parse(req *http.Request) (hooks.PushEvent, error) {
 	// TODO: LimitReader
 	data, err := ioutil.ReadAll(req.Body)
 	if err != nil {

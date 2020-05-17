@@ -18,12 +18,15 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.log.Infow("processing hook request")
 	hook, err := h.parser(r)
 	if err != nil {
+		h.log.Errorf("failed to parse request %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	err = h.updater.Update(r.Context(), hook)
+
 	if err != nil {
-		h.log.Errorf("hook update failed: %+v", err)
+		h.log.Errorf("hook update failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

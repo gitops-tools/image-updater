@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	testQuayRepo   = "testorg/testproject"
+	testQuayRepo   = "mynamespace/repository"
 	testGitHubRepo = "testorg/testrepo"
 	testFilePath   = "environments/test/services/service-a/test.yaml"
 )
@@ -219,7 +219,7 @@ func createConfigs() *config.RepoConfiguration {
 		Repositories: []*config.Repository{
 			{
 				Name:               testQuayRepo,
-				SourceRepo:         "testorg/testrepo",
+				SourceRepo:         testGitHubRepo,
 				SourceBranch:       "master",
 				FilePath:           testFilePath,
 				UpdateKey:          "test.image",
