@@ -25,7 +25,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.updater.Update(r.Context(), hook)
+	err = h.updater.UpdateFromHook(r.Context(), hook)
 
 	if err != nil {
 		h.log.Errorf("hook update failed: %v", err)

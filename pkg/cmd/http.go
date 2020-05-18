@@ -22,7 +22,7 @@ import (
 func makeHTTPCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "http",
-		Short: "update repositories in response to quay.io hooks",
+		Short: "update repositories in response to image hooks",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			logger, _ := zap.NewProduction()
 			defer func() {

@@ -32,7 +32,7 @@ func TestUpdaterWithUnknownRepo(t *testing.T) {
 	hook := createHook()
 	hook.Repository = "unknown/repo"
 
-	err := updater.Update(context.Background(), hook)
+	err := updater.UpdateFromHook(context.Background(), hook)
 
 	// A non-matching repo is not considered an error.
 	if err != nil {
@@ -62,7 +62,7 @@ func TestUpdaterWithKnownRepo(t *testing.T) {
 	updater.nameGenerator = stubNameGenerator{"a"}
 	hook := createHook()
 
-	err := updater.Update(context.Background(), hook)
+	err := updater.UpdateFromHook(context.Background(), hook)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +98,7 @@ func TestUpdaterWithNoNameGenerator(t *testing.T) {
 	updater.nameGenerator = stubNameGenerator{"a"}
 	hook := createHook()
 
-	err := updater.Update(context.Background(), hook)
+	err := updater.UpdateFromHook(context.Background(), hook)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +125,7 @@ func TestUpdaterWithMissingFile(t *testing.T) {
 	testErr := errors.New("missing file")
 	m.GetFileErr = testErr
 
-	err := updater.Update(context.Background(), hook)
+	err := updater.UpdateFromHook(context.Background(), hook)
 
 	if err != testErr {
 		t.Fatalf("got %s, want %s", err, testErr)
@@ -151,7 +151,7 @@ func TestUpdaterWithBranchCreationFailure(t *testing.T) {
 	testErr := errors.New("can't create branch")
 	m.CreateBranchErr = testErr
 
-	err := updater.Update(context.Background(), hook)
+	err := updater.UpdateFromHook(context.Background(), hook)
 
 	if err.Error() != "failed to create branch: can't create branch" {
 		t.Fatalf("got %s, want %s", err, "failed to create branch: can't create branch")
@@ -177,7 +177,7 @@ func TestUpdaterWithUpdateFileFailure(t *testing.T) {
 	testErr := errors.New("can't update file")
 	m.UpdateFileErr = testErr
 
-	err := updater.Update(context.Background(), hook)
+	err := updater.UpdateFromHook(context.Background(), hook)
 
 	if err.Error() != "failed to update file: can't update file" {
 		t.Fatalf("got %s, want %s", err, "failed to update file: can't update file")
@@ -208,7 +208,7 @@ func TestUpdaterWithCreatePullRequestFailure(t *testing.T) {
 	testErr := errors.New("can't create pull-request")
 	m.CreatePullRequestErr = testErr
 
-	err := updater.Update(context.Background(), hook)
+	err := updater.UpdateFromHook(context.Background(), hook)
 
 	if err.Error() != "failed to create a pull request: can't create pull-request" {
 		t.Fatalf("got %s, want %s", err, "failed to create a pull request: can't create pull-request")

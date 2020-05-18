@@ -19,8 +19,8 @@ func logIfError(e error) {
 
 func makeRootCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "quay-hooks",
-		Short: "Handle Quay.io hook notifications",
+		Use:   "image-hooks",
+		Short: "Update YAML files in a Git service, with optional automated Pull Requests",
 	}
 	cmd.AddCommand(makeHTTPCmd())
 	cmd.AddCommand(makeUpdateCmd())

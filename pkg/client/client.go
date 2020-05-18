@@ -38,7 +38,7 @@ func (c *SCMClient) CreateBranch(ctx context.Context, repo, branch, sha string) 
 	return err
 }
 
-// UpdateFile updates an existing file in a repository.
+// CreatePullRequest creates a PullRequest with the provided input.
 //
 // If an HTTP error is returned by the upstream service, an error with the
 // response status code is returned.

@@ -48,7 +48,9 @@ type Updater struct {
 	log           logger
 }
 
-func (u *Updater) Update(ctx context.Context, h hooks.PushEvent) error {
+// UpdateFromHook takes the incoming hook and triggers an update based on the
+// configuration for the repo in the hook (if one matches).
+func (u *Updater) UpdateFromHook(ctx context.Context, h hooks.PushEvent) error {
 	cfg := u.configs.Find(h.EventRepository())
 	if cfg == nil {
 		u.log.Infow("failed to find repo", "name", h.EventRepository())
@@ -58,6 +60,8 @@ func (u *Updater) Update(ctx context.Context, h hooks.PushEvent) error {
 	return u.UpdateRepository(ctx, cfg, h.PushedImageURL())
 }
 
+// UpdateRepository does the job of fetching the existing file, updating it, and
+// then optionally creating a PR.
 func (u *Updater) UpdateRepository(ctx context.Context, cfg *config.Repository, newURL string) error {
 	current, err := u.gitClient.GetFile(ctx, cfg.SourceRepo, cfg.SourceBranch, cfg.FilePath)
 	if err != nil {

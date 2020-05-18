@@ -1,22 +1,50 @@
-# image-hooks ![Go](https://github.com/bigkevmcd/image-hooks/workflows/Go/badge.svg)
+# image-hooks ![Go](https://github.com/bigkevmcd/image-hooks/workflows/Go/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/bigkevmcd/image-hooks)](https://goreportcard.com/report/github.com/bigkevmcd/image-hooks)
 
 This is a small tool and service for updating YAML files with image references,
 to simplify continuous deployment pipelines.
 
-You get to choose, orchestration or choreography.
+It updates a YAML file in a Git repository, and optionally opens a Pull Request.
 
 ## Command-line tool
 
 ```shell
-$ ./image-hooks update --file-path service-a/person.yaml --image-repo quay.io/myorg/my-image --source-repo mysource/my-repo --new-image-url quay.io/myorg/my-image:v1.1.0 --update-key person.name
+$ ./image-hooks --help
+Update YAML files in a Git service, with optional automated Pull Requests
+
+Usage:
+  image-hooks [command]
+
+Available Commands:
+  help        Help about any command
+  http        update repositories in response to image hooks
+  update      update a repository configuration
+
+Flags:
+  -h, --help   help for image-hooks
+
+Use "image-hooks [command] --help" for more information about a command.
 ```
+
+There are two sub-commands, `http` and `update`.
+
+`http` provides a Webhook service, and `update` will perform the same
+functionality from the command-line.
+
+## Update tool
+
+This requires a `GITHUB_TOKEN` environment variable with a token.
+
+```shell
+$ ./image-hooks update --file-path service-a/deployment.yaml --image-repo quay.io/myorg/my-image --source-repo mysource/my-repo --new-image-url quay.io/myorg/my-image:v1.1.0 --update-key spec.template.spec.containers.0.image
+```
+
+This would update a file `service-a/deployment.yaml` in a GitHub repo at `mysource/my-repo`, changing the `spec.template.spec.containers.0.image` key in the file to `quay.io/myorg/my-image:v1.1.0`, the PR will indicate that this is an update from `quay.io/myorg/my-image`.
 
 ## Webhook Service
 
-A micro-service for updating Git Repos when a hook is received indicating that a
-new image has been pushed from an image repository.
+This is a micro-service for updating Git Repos when a hook is received indicating that a new image has been pushed from an image repository.
 
-This supports receiving hooks from Docker and Quay.io.
+This currently supports receiving hooks from Docker and Quay.io.
 
 ## WARNING
 
@@ -59,12 +87,16 @@ have access to push a change directly to master.
 
 ### Creating the configuration
 
-The tool reads a YAML definition, which in the provided Deployment is mounted
+The tool reads a YAML definition, which in the provided `Deployment` is mounted
 in from a `ConfigMap`.
 
 ```shell
 $ kubectl create configmap image-hooks-config --from-file=config.yaml
 ```
+
+The default deployment requires a secret to expose the `GITHUB_TOKEN` to the
+service.
+
 
 ```shell
 $ export GITHUB_TOKEN=<insert github token>

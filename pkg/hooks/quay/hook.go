@@ -9,6 +9,8 @@ import (
 	"github.com/bigkevmcd/image-hooks/pkg/hooks"
 )
 
+// Parse takes an http.Request and parses it into a Quay.io Push hook if
+// possible.
 func Parse(req *http.Request) (hooks.PushEvent, error) {
 	// TODO: LimitReader
 	data, err := ioutil.ReadAll(req.Body)
@@ -23,6 +25,7 @@ func Parse(req *http.Request) (hooks.PushEvent, error) {
 	return h, nil
 }
 
+// RepositoryPushHook is a struct for the Quay.io push event.
 type RepositoryPushHook struct {
 	Name        string   `json:"name"`
 	Repository  string   `json:"repository"`
@@ -32,10 +35,12 @@ type RepositoryPushHook struct {
 	UpdatedTags []string `json:"updated_tags,omitempty"`
 }
 
+// PushedImageURL is an implementation of the hooks.PushEvent interface.
 func (p RepositoryPushHook) PushedImageURL() string {
 	return fmt.Sprintf("%s:%s", p.DockerURL, p.UpdatedTags[0])
 }
 
+// EventRepository is an implementation of the hooks.PushEvent interface.
 func (p RepositoryPushHook) EventRepository() string {
 	return p.Repository
 }

@@ -18,6 +18,7 @@ type Repository struct {
 	BranchGenerateName string `json:"branchGenerateName"`
 }
 
+// Parse reads and returns a configuration from Reader.
 func Parse(in io.Reader) (*RepoConfiguration, error) {
 	body, err := ioutil.ReadAll(in)
 	if err != nil {
@@ -36,6 +37,7 @@ type RepoConfiguration struct {
 	Repositories []*Repository `json:"repositories"`
 }
 
+// Find looks up the repository by name.
 func (c RepoConfiguration) Find(name string) *Repository {
 	for _, cfg := range c.Repositories {
 		if cfg.Name == name {
