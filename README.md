@@ -1,5 +1,10 @@
 # image-hooks ![Go](https://github.com/bigkevmcd/image-hooks/workflows/Go/badge.svg)
 
+This is a small tool and service for updating YAML files with image references,
+to simplify continuous deployment pipelines.
+
+You get to choose, orchestration or choreography.
+
 ## Command-line tool
 
 ```shell
@@ -15,7 +20,7 @@ This supports receiving hooks from Docker and Quay.io.
 
 ## WARNING
 
-Quay.io provides no way for receivers to authenticate Webhooks, which makes this insecure, a malicious user could trigger the creation of pull requests in your git hosting service.
+Neither Docker Hub nor Quay.io provide a way for receivers to authenticate Webhooks, which makes this insecure, a malicious user could trigger the creation of pull requests in your git hosting service.
 
 Please understand the risks of using this component.
 
@@ -46,15 +51,16 @@ with the incoming image.
 A new branch will be created based on the `branchGenerateName` field, which
 would look something like `repo-imager-kXzdf`.
 
-## Updating the sourceBranch directly
+### Updating the sourceBranch directly
 
 If no value is provided for `branchGenerateName`, then the `sourceBranch` will
-be updated directly.
+be updated directly, this means that if you use `master`, then the token must
+have access to push a change directly to master.
 
 ### Creating the configuration
 
-The tool reads a YAML definition, which by default is mounted in from a
-`ConfigMap`.
+The tool reads a YAML definition, which in the provided Deployment is mounted
+in from a `ConfigMap`.
 
 ```shell
 $ kubectl create configmap image-hooks-config --from-file=config.yaml
@@ -69,16 +75,20 @@ $ kubectl create secret generic image-hooks-secret --from-literal=token=$GITHUB_
 
 A Kubernetes `Deployment` is provided in [./deploy/deployment.yaml](./deploy/deployment.yaml).
 
-The service is not dependent on being executed within a Kubernetes cluster.
+The service is **not** dependent on being executed within a Kubernetes cluster.
 
 ## Choosing a hook parser
 
 By default, this accepts hooks from Docker hub but the deployment can easily be
 changed to support Quay.io.
 
+The `--parser` command-line option chooses which of the supported (Quay, Docker)
+hook formats to parse.
+
 ## Exposing the Handler
 
-The Service exposes a Hook handler at `/` on port 8080 that handles the hooks.
+The Service exposes a Hook handler at `/` on port 8080 that handles the
+configured hook type.
 
 ## Building
 
