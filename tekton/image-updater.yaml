@@ -1,0 +1,63 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: image-updater
+spec:
+  params:
+    - name: driver
+      type: string
+      description: The driver to use for connecting, 'gitlab' or 'github'.
+    - name: file-path
+      type: string
+      description: Path within the source-repo to update
+    - name: image-repo
+      type: string
+      description: Image repo e.g. org/repo that is being updated
+    - name: new-image-url
+      type: string
+      description: Image URL to populate file with e.g. myorg/my-image:c2b4eff
+    - name: source-branch
+      type: string
+      description: Branch to fetch for updating
+      default: master
+    - name: source-repo
+      type: string
+      description: Git repository to update e.g. org/repo
+    - name: branch-generate-name
+      type: string
+      description: >
+        Prefix for naming automatically generated branch, if empty, this will
+        update source-branch
+    - name: update-key
+      type: string
+      description: >
+        JSON path within the file-path to update
+        e.g. spec.template.spec.containers.0.image
+  steps:
+    - name: update-image
+      image: bigkevmcd/image-hooks:latest
+      args:
+        - "update"
+        - "--driver"
+        - "$(params.driver)"
+        - "--file-path"
+        - "$(params.file-path)"
+        - "--image-repo"
+        - "$(params.image-repo)"
+        - "--new-image-url"
+        - "$(params.new-image-url)"
+        - "--source-branch"
+        - "$(params.source-branch)"
+        - "--source-repo"
+        - "$(params.source-repo)"
+        - "--update-key"
+        - "$(params.update-key)"
+        - "--branch-generate-name"
+        - "$(params.branch-generate-name)"
+      env:
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: image-updater-secret
+              key: token

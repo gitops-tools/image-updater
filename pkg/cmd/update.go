@@ -23,8 +23,7 @@ func makeUpdateCmd() *cobra.Command {
 			defer func() {
 				_ = logger.Sync() // flushes buffer, if any
 			}()
-
-			scmClient, err := factory.NewClient(viper.GetString("driver"), "", githubToken())
+			scmClient, err := factory.NewClient(viper.GetString("driver"), "", viper.GetString("github_token"))
 			if err != nil {
 				return fmt.Errorf("failed to create a git driver: %s", err)
 			}
@@ -59,7 +58,7 @@ func addConfigFlags(cmd *cobra.Command) {
 	cmd.Flags().String(
 		"image-repo",
 		"",
-		"Image image-repo e.g. org/repo",
+		"Image repo e.g. org/repo that is being updated - used in the created PR",
 	)
 	logIfError(viper.BindPFlag("image-repo", cmd.Flags().Lookup("image-repo")))
 	logIfError(cmd.MarkFlagRequired("image-repo"))
@@ -67,7 +66,7 @@ func addConfigFlags(cmd *cobra.Command) {
 	cmd.Flags().String(
 		"source-repo",
 		"",
-		"Git repository to update",
+		"Git repository to update e.g. org/repo",
 	)
 	logIfError(viper.BindPFlag("source-repo", cmd.Flags().Lookup("source-repo")))
 	logIfError(cmd.MarkFlagRequired("source-repo"))
@@ -82,7 +81,7 @@ func addConfigFlags(cmd *cobra.Command) {
 	cmd.Flags().String(
 		"file-path",
 		"",
-		"Path with the source-repo to update",
+		"Path within the source-repo to update",
 	)
 	logIfError(viper.BindPFlag("file-path", cmd.Flags().Lookup("file-path")))
 	logIfError(cmd.MarkFlagRequired("file-path"))
@@ -101,6 +100,13 @@ func addConfigFlags(cmd *cobra.Command) {
 		"Prefix for naming automatically generated branch, if empty, this will update source-branch",
 	)
 	logIfError(viper.BindPFlag("branch-generate-name", cmd.Flags().Lookup("branch-generate-name")))
+
+	cmd.Flags().String(
+		"github_token",
+		"",
+		"The GitHub token to authenticate requests",
+	)
+	logIfError(viper.BindPFlag("github_token", cmd.Flags().Lookup("github_token")))
 }
 
 func configFromFlags() *config.Repository {
