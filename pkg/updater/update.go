@@ -69,8 +69,8 @@ func (u *Updater) UpdateRepository(ctx context.Context, cfg *config.Repository, 
 		return err
 	}
 	u.log.Infow("got existing file", "sha", current.Sha)
-
 	u.log.Infow("new image reference", "image", newURL)
+
 	updated, err := syaml.SetBytes(current.Data, cfg.UpdateKey, newURL)
 	if err != nil {
 		return err

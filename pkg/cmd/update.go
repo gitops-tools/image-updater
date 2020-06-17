@@ -23,7 +23,7 @@ func makeUpdateCmd() *cobra.Command {
 			defer func() {
 				_ = logger.Sync() // flushes buffer, if any
 			}()
-			scmClient, err := factory.NewClient(viper.GetString("driver"), "", viper.GetString("github_token"))
+			scmClient, err := factory.NewClient(viper.GetString("driver"), viper.GetString("api-endpoint"), viper.GetString("auth_token"))
 			if err != nil {
 				return fmt.Errorf("failed to create a git driver: %s", err)
 			}
@@ -102,11 +102,19 @@ func addConfigFlags(cmd *cobra.Command) {
 	logIfError(viper.BindPFlag("branch-generate-name", cmd.Flags().Lookup("branch-generate-name")))
 
 	cmd.Flags().String(
-		"github_token",
+		"auth_token",
 		"",
-		"The GitHub token to authenticate requests",
+		"The token to authenticate requests to your Git hosting service",
 	)
-	logIfError(viper.BindPFlag("github_token", cmd.Flags().Lookup("github_token")))
+	logIfError(viper.BindPFlag("auth_token", cmd.Flags().Lookup("auth_token")))
+
+	cmd.Flags().String(
+		"api-endpoint",
+		"",
+		"The API endpoint to communicate with private GitLab/GitHub installations",
+	)
+	logIfError(viper.BindPFlag("api-endpoint", cmd.Flags().Lookup("api-endpoint")))
+
 }
 
 func configFromFlags() *config.Repository {
