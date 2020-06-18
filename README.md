@@ -40,6 +40,16 @@ $ ./image-hooks update --file-path service-a/deployment.yaml --image-repo quay.i
 
 This would update a file `service-a/deployment.yaml` in a GitHub repo at `mysource/my-repo`, changing the `spec.template.spec.containers.0.image` key in the file to `quay.io/myorg/my-image:v1.1.0`, the PR will indicate that this is an update from `quay.io/myorg/my-image`.
 
+If you need to access a private GitLab or GitHub installation, you can provide
+the `--api-endpoint` e.g.
+
+```shell
+$ ./image-hooks update --file-path service-a/deployment.yaml --image-repo quay.io/myorg/my-image --source-repo mysource/my-repo --new-image-url quay.io/myorg/my-image:v1.1.0 --update-key spec.template.spec.containers.0.image
+```
+
+For the HTTP service, you will likely need to adapt the deployment, to either
+add the parameter.
+
 ## Webhook Service
 
 This is a micro-service for updating Git Repos when a hook is received indicating that a new image has been pushed from an image repository.

@@ -4,10 +4,8 @@ go 1.14
 
 require (
 	github.com/google/go-cmp v0.4.0
-	github.com/h2non/gock v1.0.9
 	github.com/jenkins-x/go-scm v1.5.141
 	github.com/kr/text v0.2.0 // indirect
-	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cobra v1.0.0
@@ -20,5 +18,6 @@ require (
 	golang.org/x/sys v0.0.0-20200420163511-1957bb5e6d1f // indirect
 	golang.org/x/tools v0.0.0-20200214144324-88be01311a71 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
+	gopkg.in/h2non/gock.v1 v1.0.15
 	sigs.k8s.io/yaml v1.2.0
 )

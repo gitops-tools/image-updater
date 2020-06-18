@@ -29,7 +29,7 @@ func makeHTTPCmd() *cobra.Command {
 				_ = logger.Sync() // flushes buffer, if any
 			}()
 
-			scmClient, err := factory.NewClient(viper.GetString("driver"), "", viper.GetString("github_token"))
+			scmClient, err := factory.NewClient(viper.GetString("driver"), viper.GetString("api-endpoint"), viper.GetString("github_token"))
 			if err != nil {
 				return fmt.Errorf("failed to create a git driver: %s", err)
 			}
@@ -66,13 +66,6 @@ func makeHTTPCmd() *cobra.Command {
 	logIfError(viper.BindPFlag("port", cmd.Flags().Lookup("port")))
 
 	cmd.Flags().String(
-		"driver",
-		"github",
-		"go-scm driver name to use e.g. github, gitlab",
-	)
-	logIfError(viper.BindPFlag("driver", cmd.Flags().Lookup("driver")))
-
-	cmd.Flags().String(
 		"parser",
 		"quay",
 		"what driver to use to parse incoming webhooks e.g. quay, docker",
@@ -86,12 +79,6 @@ func makeHTTPCmd() *cobra.Command {
 	)
 	logIfError(viper.BindPFlag("config", cmd.Flags().Lookup("config")))
 
-	cmd.Flags().String(
-		"github_token",
-		"",
-		"The GitHub token to authenticate requests",
-	)
-	logIfError(viper.BindPFlag("github_token", cmd.Flags().Lookup("github_token")))
 	return cmd
 }
 

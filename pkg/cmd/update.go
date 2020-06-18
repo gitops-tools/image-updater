@@ -35,13 +35,6 @@ func makeUpdateCmd() *cobra.Command {
 	}
 
 	cmd.Flags().String(
-		"driver",
-		"github",
-		"go-scm driver name to use e.g. github, gitlab",
-	)
-	logIfError(viper.BindPFlag("driver", cmd.Flags().Lookup("driver")))
-
-	cmd.Flags().String(
 		"new-image-url",
 		"",
 		"Image URL to populate the file with e.g. myorg/my-image",
@@ -100,21 +93,6 @@ func addConfigFlags(cmd *cobra.Command) {
 		"Prefix for naming automatically generated branch, if empty, this will update source-branch",
 	)
 	logIfError(viper.BindPFlag("branch-generate-name", cmd.Flags().Lookup("branch-generate-name")))
-
-	cmd.Flags().String(
-		"auth_token",
-		"",
-		"The token to authenticate requests to your Git hosting service",
-	)
-	logIfError(viper.BindPFlag("auth_token", cmd.Flags().Lookup("auth_token")))
-
-	cmd.Flags().String(
-		"api-endpoint",
-		"",
-		"The API endpoint to communicate with private GitLab/GitHub installations",
-	)
-	logIfError(viper.BindPFlag("api-endpoint", cmd.Flags().Lookup("api-endpoint")))
-
 }
 
 func configFromFlags() *config.Repository {

@@ -98,6 +98,7 @@ func (u *Updater) createBranchIfNecessary(ctx context.Context, cfg *config.Repos
 	}
 
 	newBranchName := u.nameGenerator.PrefixedName(cfg.BranchGenerateName)
+	u.log.Infow("generating new branch", "name", newBranchName)
 	err := u.gitClient.CreateBranch(ctx, cfg.SourceRepo, newBranchName, masterRef)
 	if err != nil {
 		return "", fmt.Errorf("failed to create branch: %w", err)

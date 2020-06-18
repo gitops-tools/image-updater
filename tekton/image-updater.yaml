@@ -8,6 +8,12 @@ spec:
     - name: driver
       type: string
       description: The driver to use for connecting, 'gitlab' or 'github'.
+    - name: api-endpoint
+      type: string
+      description: >
+        Required for private GitLab and Github installations 
+        e.g. https://gitlab.example.com leave blank otherwise.
+      default: ""
     - name: file-path
       type: string
       description: Path within the source-repo to update
@@ -56,7 +62,7 @@ spec:
         - "--branch-generate-name"
         - "$(params.branch-generate-name)"
       env:
-        - name: GITHUB_TOKEN
+        - name: AUTH_TOKEN
           valueFrom:
             secretKeyRef:
               name: image-updater-secret

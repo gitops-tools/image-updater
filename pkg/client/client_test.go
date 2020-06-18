@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/h2non/gock"
 	"github.com/jenkins-x/go-scm/scm"
 	"github.com/jenkins-x/go-scm/scm/factory"
+	"gopkg.in/h2non/gock.v1"
 )
 
 var _ GitClient = (*SCMClient)(nil)
@@ -61,7 +61,7 @@ func TestGetFileWithErrorResponse(t *testing.T) {
 	}
 }
 
-func TestUpdateFile(t *testing.T) {
+func TestUpdateFileWithGitHub(t *testing.T) {
 	message := "just a test message"
 	content := []byte("testing")
 	branch := "my-test-branch"
@@ -86,13 +86,15 @@ func TestUpdateFile(t *testing.T) {
 	}
 	client := New(scmClient)
 
-	err = client.UpdateFile(context.TODO(), "Codertocat/Hello-World", branch, "config/my/file.yaml", message, "980a0d5f19a64b4b30a87d4206aade58726b60e3", []byte(`testing`))
+	err = client.UpdateFile(context.TODO(), "Codertocat/Hello-World", branch,
+		"config/my/file.yaml", message, "980a0d5f19a64b4b30a87d4206aade58726b60e3",
+		[]byte(`testing`))
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestCreateBranch(t *testing.T) {
+func TestCreateBranchInGitHub(t *testing.T) {
 	sha := "aa218f56b14c9653891f9e74264a383fa43fefbd"
 
 	gock.New("https://api.github.com").
@@ -111,6 +113,35 @@ func TestCreateBranch(t *testing.T) {
 	client := New(scmClient)
 
 	err = client.CreateBranch(context.Background(), "Codertocat/Hello-World", "new-feature", sha)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !gock.IsDone() {
+		t.Fatal("branch was not created")
+	}
+}
+
+func TestCreateBranchInGitLab(t *testing.T) {
+	sha := "aa218f56b14c9653891f9e74264a383fa43fefbd"
+	branch := "new-feature"
+	gock.Observe(gock.DumpRequest)
+
+	gock.New("https://gitlab.com").
+		Post("/api/v4/projects/Codertocat/Hello-World/repository/branches").
+		MatchParam("branch", branch).
+		MatchParam("ref", sha).
+		Reply(http.StatusCreated).
+		Type("application/json").
+		File("testdata/content.json")
+	defer gock.Off()
+
+	scmClient, err := factory.NewClient("gitlab", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := New(scmClient)
+
+	err = client.CreateBranch(context.Background(), "Codertocat/Hello-World", branch, sha)
 	if err != nil {
 		t.Fatal(err)
 	}

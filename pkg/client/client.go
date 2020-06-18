@@ -34,7 +34,10 @@ func (c *SCMClient) GetFile(ctx context.Context, repo, ref, path string) (*scm.C
 
 // CreateBranch will create a new branch in the repo from the SHA.
 func (c *SCMClient) CreateBranch(ctx context.Context, repo, branch, sha string) error {
-	_, _, err := c.scmClient.Git.CreateRef(ctx, repo, fmt.Sprintf("refs/heads/%s", branch), sha)
+	if isGitHub(c.scmClient) {
+		branch = fmt.Sprintf("refs/heads/%s", branch)
+	}
+	_, _, err := c.scmClient.Git.CreateRef(ctx, repo, branch, sha)
 	return err
 }
 
@@ -75,6 +78,10 @@ func (c *SCMClient) UpdateFile(ctx context.Context, repo, branch, path, message,
 func (c *SCMClient) GetBranchHead(ctx context.Context, repo, branch string) (string, error) {
 	sha, _, err := c.scmClient.Git.FindRef(ctx, repo, fmt.Sprintf("heads/%s", branch))
 	return sha, err
+}
+
+func isGitHub(c *scm.Client) bool {
+	return c.Driver == scm.DriverGithub
 }
 
 func isErrorStatus(i int) bool {
