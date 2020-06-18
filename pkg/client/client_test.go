@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/bigkevmcd/image-hooks/test"
 	"github.com/google/go-cmp/cmp"
 	"github.com/jenkins-x/go-scm/scm"
 	"github.com/jenkins-x/go-scm/scm/factory"
@@ -56,12 +57,25 @@ func TestGetFileWithErrorResponse(t *testing.T) {
 	client := New(scmClient)
 
 	_, err = client.GetFile(context.TODO(), "Codertocat/Hello-World", "master", "config/my/file.yaml")
-	if err.Error() != "failed to get file config/my/file.yaml from repo Codertocat/Hello-World ref master: (500)" {
-		t.Fatal(err)
+	if !test.MatchError(t, `failed to get file.*(500)`, err) {
+		t.Fatalf("failed to match error: %s", err)
 	}
 }
 
-func TestUpdateFileWithGitHub(t *testing.T) {
+func TestGetFileWithNoServer(t *testing.T) {
+	scmClient, err := factory.NewClient("github", "https://localhost:2000", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := New(scmClient)
+
+	_, err = client.GetFile(context.TODO(), "Codertocat/Hello-World", "master", "config/my/file.yaml")
+	if !test.MatchError(t, `connect: connection refused`, err) {
+		t.Fatalf("failed to match error: %s", err)
+	}
+}
+
+func TestUpdateFile(t *testing.T) {
 	message := "just a test message"
 	content := []byte("testing")
 	branch := "my-test-branch"
@@ -91,6 +105,24 @@ func TestUpdateFileWithGitHub(t *testing.T) {
 		[]byte(`testing`))
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestUpdateFileWithNoConnection(t *testing.T) {
+	message := "just a test message"
+	branch := "my-test-branch"
+
+	scmClient, err := factory.NewClient("github", "https://localhost:2000", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := New(scmClient)
+
+	err = client.UpdateFile(context.TODO(), "Codertocat/Hello-World", branch,
+		"config/my/file.yaml", message, "980a0d5f19a64b4b30a87d4206aade58726b60e3",
+		[]byte(`testing`))
+	if !test.MatchError(t, `connect: connection refused`, err) {
+		t.Fatalf("failed to match error: %s", err)
 	}
 }
 
@@ -124,7 +156,6 @@ func TestCreateBranchInGitHub(t *testing.T) {
 func TestCreateBranchInGitLab(t *testing.T) {
 	sha := "aa218f56b14c9653891f9e74264a383fa43fefbd"
 	branch := "new-feature"
-	gock.Observe(gock.DumpRequest)
 
 	gock.New("https://gitlab.com").
 		Post("/api/v4/projects/Codertocat/Hello-World/repository/branches").

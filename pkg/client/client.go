@@ -23,7 +23,7 @@ type SCMClient struct {
 // response status code is returned.
 func (c *SCMClient) GetFile(ctx context.Context, repo, ref, path string) (*scm.Content, error) {
 	content, r, err := c.scmClient.Contents.Find(ctx, repo, path, ref)
-	if isErrorStatus(r.Status) {
+	if r != nil && isErrorStatus(r.Status) {
 		return nil, scmError{msg: fmt.Sprintf("failed to get file %s from repo %s ref %s", path, repo, ref), Status: r.Status}
 	}
 	if err != nil {
