@@ -115,7 +115,7 @@ func (u *Updater) createPRIfNecessary(ctx context.Context, cfg *config.Repositor
 		Title: fmt.Sprintf("Image %s updated", repository),
 		Body:  "Automated Image Update",
 		Head:  newBranchName,
-		Base:  "master",
+		Base:  cfg.SourceBranch,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create a pull request: %w", err)

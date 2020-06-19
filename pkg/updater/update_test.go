@@ -227,6 +227,37 @@ func TestUpdaterWithCreatePullRequestFailure(t *testing.T) {
 	})
 }
 
+func TestUpdaterWithNonMasterSourceBranch(t *testing.T) {
+	testSHA := "980a0d5f19a64b4b30a87d4206aade58726b60e3"
+	m := mock.New(t)
+	m.AddFileContents(testGitHubRepo, testFilePath, "staging", []byte("test:\n  image: old-image\n"))
+	m.AddBranchHead(testGitHubRepo, "staging", testSHA)
+	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)).Sugar()
+	configs := createConfigs()
+	configs.Repositories[0].SourceBranch = "staging"
+	updater := New(logger, m, configs)
+	updater.nameGenerator = stubNameGenerator{"a"}
+	hook := createHook()
+
+	err := updater.UpdateFromHook(context.Background(), hook)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	updated := m.GetUpdatedContents(testGitHubRepo, testFilePath, "test-branch-a")
+	want := "test:\n  image: quay.io/testorg/repo:production\n"
+	if s := string(updated); s != want {
+		t.Fatalf("update failed, got %#v, want %#v", s, want)
+	}
+	m.AssertBranchCreated(testGitHubRepo, "test-branch-a", testSHA)
+	m.AssertPullRequestCreated(testGitHubRepo, &scm.PullRequestInput{
+		Title: fmt.Sprintf("Image %s updated", testQuayRepo),
+		Body:  "Automated Image Update",
+		Head:  "test-branch-a",
+		Base:  "staging",
+	})
+}
+
 func createHook() *quay.RepositoryPushHook {
 	return &quay.RepositoryPushHook{
 		Repository:  testQuayRepo,
