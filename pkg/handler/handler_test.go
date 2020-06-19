@@ -11,11 +11,11 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
 
-	"github.com/bigkevmcd/image-hooks/pkg/client/mock"
-	"github.com/bigkevmcd/image-hooks/pkg/config"
-	"github.com/bigkevmcd/image-hooks/pkg/hooks"
-	"github.com/bigkevmcd/image-hooks/pkg/hooks/quay"
-	"github.com/bigkevmcd/image-hooks/pkg/updater"
+	"github.com/gitops-tools/image-hooks/pkg/client/mock"
+	"github.com/gitops-tools/image-hooks/pkg/config"
+	"github.com/gitops-tools/image-hooks/pkg/hooks"
+	"github.com/gitops-tools/image-hooks/pkg/hooks/quay"
+	"github.com/gitops-tools/image-hooks/pkg/updater"
 	"github.com/jenkins-x/go-scm/scm"
 )
 

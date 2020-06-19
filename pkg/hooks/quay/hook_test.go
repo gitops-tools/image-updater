@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/bigkevmcd/image-hooks/pkg/hooks"
+	"github.com/gitops-tools/image-hooks/pkg/hooks"
 	"github.com/google/go-cmp/cmp"
 )
 

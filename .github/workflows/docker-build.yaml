@@ -13,7 +13,7 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-      
+
     - name: build docker image and push
       uses: docker/build-push-action@v1
       with:

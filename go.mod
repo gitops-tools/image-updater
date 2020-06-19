@@ -1,4 +1,4 @@
-module github.com/bigkevmcd/image-hooks
+module github.com/gitops-tools/image-hooks
 
 go 1.14
 

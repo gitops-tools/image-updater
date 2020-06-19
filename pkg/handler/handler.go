@@ -5,8 +5,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/bigkevmcd/image-hooks/pkg/hooks"
-	"github.com/bigkevmcd/image-hooks/pkg/updater"
+	"github.com/gitops-tools/image-hooks/pkg/hooks"
+	"github.com/gitops-tools/image-hooks/pkg/updater"
 )
 
 // Handler parses and processes hook notifications.

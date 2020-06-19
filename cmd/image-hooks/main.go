@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/bigkevmcd/image-hooks/pkg/cmd"
+	"github.com/gitops-tools/image-hooks/pkg/cmd"
 )
 
 func main() {

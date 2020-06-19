@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
-	"github.com/bigkevmcd/image-hooks/pkg/client"
-	"github.com/bigkevmcd/image-hooks/pkg/config"
-	"github.com/bigkevmcd/image-hooks/pkg/updater"
+	"github.com/gitops-tools/image-hooks/pkg/client"
+	"github.com/gitops-tools/image-hooks/pkg/config"
+	"github.com/gitops-tools/image-hooks/pkg/updater"
 )
 
 func makeUpdateCmd() *cobra.Command {

@@ -1,4 +1,4 @@
-# image-hooks ![Go](https://github.com/bigkevmcd/image-hooks/workflows/Go/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/bigkevmcd/image-hooks)](https://goreportcard.com/report/github.com/bigkevmcd/image-hooks)
+# image-hooks ![Go](https://github.com/gitops-tools/image-hooks/workflows/Go/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/gitops-tools/image-hooks)](https://goreportcard.com/report/github.com/gitops-tools/image-hooks)
 
 This is a small tool and service for updating YAML files with image references,
 to simplify continuous deployment pipelines.

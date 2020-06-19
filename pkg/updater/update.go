@@ -6,11 +6,11 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/bigkevmcd/image-hooks/pkg/client"
-	"github.com/bigkevmcd/image-hooks/pkg/config"
-	"github.com/bigkevmcd/image-hooks/pkg/hooks"
-	"github.com/bigkevmcd/image-hooks/pkg/names"
-	"github.com/bigkevmcd/image-hooks/pkg/syaml"
+	"github.com/gitops-tools/image-hooks/pkg/client"
+	"github.com/gitops-tools/image-hooks/pkg/config"
+	"github.com/gitops-tools/image-hooks/pkg/hooks"
+	"github.com/gitops-tools/image-hooks/pkg/names"
+	"github.com/gitops-tools/image-hooks/pkg/syaml"
 	"github.com/jenkins-x/go-scm/scm"
 )
 
