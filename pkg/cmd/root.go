@@ -51,9 +51,9 @@ func makeRootCmd() *cobra.Command {
 	)
 	logIfError(viper.BindPFlag(apiEndpointFlag, cmd.PersistentFlags().Lookup(apiEndpointFlag)))
 
-	cmd.PersistentFlags().String(
+	cmd.PersistentFlags().Bool(
 		insecureFlag,
-		"k",
+		false,
 		"Allow insecure server connections when using SSL",
 	)
 	logIfError(viper.BindPFlag(insecureFlag, cmd.PersistentFlags().Lookup(insecureFlag)))
