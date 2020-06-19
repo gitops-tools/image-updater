@@ -40,6 +40,10 @@ spec:
       description: >
         JSON path within the file-path to update
         e.g. spec.template.spec.containers.0.image
+    - name: insecure
+      type: string
+      description: Allow insecure server connections when using SSL
+      default: false
   steps:
     - name: update-image
       image: bigkevmcd/image-hooks:latest
@@ -63,6 +67,8 @@ spec:
         - "$(params.branch-generate-name)"
         - "--api-endpoint"
         - "$(params.api-endpoint)"
+        - "--insecure"
+        - "$(params.insecure)"
       env:
         - name: AUTH_TOKEN
           valueFrom:

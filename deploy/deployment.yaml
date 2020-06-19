@@ -22,7 +22,7 @@ spec:
           - name: config-volume
             mountPath: /etc/image-hooks
           env:
-            - name: GITHUB_TOKEN
+            - name: AUTH_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: image-hooks-secret

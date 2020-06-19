@@ -15,6 +15,7 @@ require (
 	github.com/tidwall/sjson v1.1.1
 	go.uber.org/zap v1.15.0
 	golang.org/x/lint v0.0.0-20200130185559-910be7a94367 // indirect
+	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sys v0.0.0-20200420163511-1957bb5e6d1f // indirect
 	golang.org/x/tools v0.0.0-20200214144324-88be01311a71 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect

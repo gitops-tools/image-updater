@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jenkins-x/go-scm/scm/factory"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -23,7 +22,7 @@ func makeUpdateCmd() *cobra.Command {
 			defer func() {
 				_ = logger.Sync() // flushes buffer, if any
 			}()
-			scmClient, err := factory.NewClient(viper.GetString("driver"), viper.GetString("api-endpoint"), viper.GetString("auth_token"))
+			scmClient, err := createClientFromViper()
 			if err != nil {
 				return fmt.Errorf("failed to create a git driver: %s", err)
 			}

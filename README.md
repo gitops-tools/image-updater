@@ -32,7 +32,7 @@ functionality from the command-line.
 
 ## Update tool
 
-This requires a `GITHUB_TOKEN` environment variable with a token.
+This requires a `AUTH_TOKEN` environment variable with a token.
 
 ```shell
 $ ./image-hooks update --file-path service-a/deployment.yaml --image-repo quay.io/myorg/my-image --source-repo mysource/my-repo --new-image-url quay.io/myorg/my-image:v1.1.0 --update-key spec.template.spec.containers.0.image
@@ -47,8 +47,9 @@ the `--api-endpoint` e.g.
 $ ./image-hooks update --file-path service-a/deployment.yaml --image-repo quay.io/myorg/my-image --source-repo mysource/my-repo --new-image-url quay.io/myorg/my-image:v1.1.0 --update-key spec.template.spec.containers.0.image
 ```
 
-For the HTTP service, you will likely need to adapt the deployment, to either
-add the parameter.
+For the HTTP service, you will likely need to adapt the deployment.
+
+You can also opt to allow for insecure TLS access with `--insecure`.
 
 ## Webhook Service
 

@@ -7,6 +7,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	driverFlag      = "driver"
+	apiEndpointFlag = "api-endpoint"
+	authTokenFlag   = "auth_token"
+	insecureFlag    = "insecure"
+)
+
 func init() {
 	cobra.OnInitialize(initConfig)
 }
@@ -25,24 +32,31 @@ func makeRootCmd() *cobra.Command {
 	}
 
 	cmd.PersistentFlags().String(
-		"driver",
+		driverFlag,
 		"github",
 		"go-scm driver name to use e.g. github, gitlab",
 	)
-	logIfError(viper.BindPFlag("driver", cmd.PersistentFlags().Lookup("driver")))
+	logIfError(viper.BindPFlag(driverFlag, cmd.PersistentFlags().Lookup(driverFlag)))
 	cmd.PersistentFlags().String(
-		"github_token",
+		authTokenFlag,
 		"",
-		"The GitHub token to authenticate requests",
+		"The token to authenticate requests to your Git service",
 	)
-	logIfError(viper.BindPFlag("github_token", cmd.PersistentFlags().Lookup("github_token")))
+	logIfError(viper.BindPFlag(authTokenFlag, cmd.PersistentFlags().Lookup(authTokenFlag)))
 
 	cmd.PersistentFlags().String(
-		"api-endpoint",
+		apiEndpointFlag,
 		"",
 		"The API endpoint to communicate with private GitLab/GitHub installations",
 	)
-	logIfError(viper.BindPFlag("api-endpoint", cmd.PersistentFlags().Lookup("api-endpoint")))
+	logIfError(viper.BindPFlag(apiEndpointFlag, cmd.PersistentFlags().Lookup(apiEndpointFlag)))
+
+	cmd.PersistentFlags().String(
+		insecureFlag,
+		"k",
+		"Allow insecure server connections when using SSL",
+	)
+	logIfError(viper.BindPFlag(insecureFlag, cmd.PersistentFlags().Lookup(insecureFlag)))
 
 	cmd.AddCommand(makeHTTPCmd())
 	cmd.AddCommand(makeUpdateCmd())
