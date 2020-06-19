@@ -43,7 +43,7 @@ spec:
     - name: insecure
       type: string
       description: Allow insecure server connections when using SSL
-      default: false
+      default: "false"
   steps:
     - name: update-image
       image: bigkevmcd/image-hooks:latest
