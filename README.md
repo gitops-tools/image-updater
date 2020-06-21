@@ -138,11 +138,11 @@ configured hook type.
 A `Dockerfile` is provided for building a container, but otherwise:
 
 ```shell
-$ go build ./cmd/quay-hooks
+$ go build ./cmd/image-hooks
 ```
 
 ## Testing
 
 ```shell
-$ go build ./...
+$ go test ./...
 ```
