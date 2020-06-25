@@ -1,5 +1,7 @@
 name: Docker Image CI
 
+
+
 on:
   push:
     branches: [ main ]
@@ -8,6 +10,7 @@ on:
 
 jobs:
   build:
+    if: github.repository == 'gitops-tools/image-hooks'
     runs-on: ubuntu-latest
     steps:
 
