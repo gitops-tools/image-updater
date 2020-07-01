@@ -85,6 +85,20 @@ func TestEventRepository(t *testing.T) {
 	}
 }
 
+func TestEventTag(t *testing.T) {
+	hook := &RepositoryPushHook{
+		Repository:  "mynamespace/repository",
+		Name:        "repository",
+		DockerURL:   "quay.io/mynamespace/repository",
+		UpdatedTags: []string{"v1", "latest"},
+	}
+
+	want := "v1"
+	if u := hook.EventTag(); u != want {
+		t.Fatalf("got %s, want %s", u, want)
+	}
+}
+
 func makeHookRequest(t *testing.T, fixture string) *http.Request {
 	t.Helper()
 	b, err := ioutil.ReadFile(fixture)

@@ -41,6 +41,11 @@ func (p Webhook) EventRepository() string {
 	return p.Repository.RepoName
 }
 
+// EventTag is an implementation of the hooks.PushEvent interface.
+func (p Webhook) EventTag() string {
+	return p.PushData.Tag
+}
+
 // PushData is part of the Webhook struct.
 type PushData struct {
 	Images   []string `json:"images"`

@@ -6,6 +6,7 @@ import "net/http"
 type PushEvent interface {
 	PushedImageURL() string
 	EventRepository() string
+	EventTag() string
 }
 
 // PushEventParser parses the specifics of a hook request into a body.

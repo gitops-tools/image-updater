@@ -42,10 +42,11 @@ func TestParse(t *testing.T) {
 					{
 						Name:               "testing/repo-image",
 						SourceRepo:         "example/example-source",
-						SourceBranch:       "master",
+						SourceBranch:       "main",
 						FilePath:           "test/file.yaml",
 						UpdateKey:          "person.name",
 						BranchGenerateName: "repo-imager-",
+						TagMatch:           ".*main",
 					},
 				},
 			},

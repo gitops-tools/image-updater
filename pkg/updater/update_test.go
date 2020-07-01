@@ -51,6 +51,31 @@ func TestUpdaterWithUnknownRepo(t *testing.T) {
 	})
 }
 
+func TestUpdaterWithNonMatchingTag(t *testing.T) {
+	testSHA := "980a0d5f19a64b4b30a87d4206aade58726b60e3"
+	m := mock.New(t)
+	m.AddFileContents(testGitHubRepo, testFilePath, "master", []byte("test:\n  image: old-image\n"))
+	m.AddBranchHead(testGitHubRepo, "master", testSHA)
+	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)).Sugar()
+
+	configs := createConfigs()
+	configs.Repositories[0].BranchGenerateName = ""
+	configs.Repositories[0].TagMatch = "^v.*"
+
+	updater := New(logger, m, configs)
+	updater.nameGenerator = stubNameGenerator{"a"}
+	hook := createHook()
+
+	err := updater.UpdateFromHook(context.Background(), hook)
+
+	// A non-matching tag is not considered an error.
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m.AssertNoInteractions()
+}
+
 func TestUpdaterWithKnownRepo(t *testing.T) {
 	testSHA := "980a0d5f19a64b4b30a87d4206aade58726b60e3"
 	m := mock.New(t)

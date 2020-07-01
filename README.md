@@ -71,17 +71,18 @@ This service uses a really simple configuration:
 repositories:
   - name: testing/repo-image
     sourceRepo: my-org/my-project
-    sourceBranch: master
+    sourceBranch: main
     filePath: service-a/deployment.yaml
     updateKey: spec.template.spec.containers.0.image
     branchGenerateName: repo-imager-
+    tagMatch: "^main-.*"
 ```
 
 This is a single repository configuration, Repo Push notifications from the
 image `testing/repo-image`, will trigger an update in the repo
 `my-org/my-project`.
 
-The change will be based off the `master` branch, and updating the file
+The change will be based off the `main` branch, and updating the file
 `service-a/deployment.yaml`.
 
 Within that file, the `spec.template.spec.containers.0.image` field will be replaced
@@ -90,11 +91,15 @@ with the incoming image.
 A new branch will be created based on the `branchGenerateName` field, which
 would look something like `repo-imager-kXzdf`.
 
+The presence of the `tagMatch` field means that it should only apply the update,
+if the tag being changed matches this regular expression, in this case, tags
+like "main-c1f79ab" would match, but "test-pr-branch-c1f79ab" would not.
+
 ### Updating the sourceBranch directly
 
 If no value is provided for `branchGenerateName`, then the `sourceBranch` will
-be updated directly, this means that if you use `master`, then the token must
-have access to push a change directly to master.
+be updated directly, this means that if you use `main`, then the token must
+have access to push a change directly to `main`.
 
 ### Creating the configuration
 
@@ -132,6 +137,11 @@ hook formats to parse.
 
 The Service exposes a Hook handler at `/` on port 8080 that handles the
 configured hook type.
+
+## Tekton
+
+A Tekton task is provided in [./tekton](./tekton) which allows you to apply
+updates to repos from a Tekton pipeline run.
 
 ## Building
 

@@ -167,6 +167,21 @@ func (m *MockClient) AssertNoPullRequestsCreated() {
 	}
 }
 
+// AssertNoInteractions fails if any git request was made.
+func (m *MockClient) AssertNoInteractions() {
+	if len(m.updatedFiles) != 0 {
+		m.t.Fatalf("files were updated %#v", m.updatedFiles)
+	}
+
+	if len(m.createdBranches) != 0 {
+		m.t.Fatalf("branches created %#v", m.createdBranches)
+	}
+
+	if len(m.createdPullRequests) != 0 {
+		m.t.Fatalf("pull requests created %#v", m.createdPullRequests)
+	}
+}
+
 func key(s ...string) string {
 	return strings.Join(s, ":")
 }

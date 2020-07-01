@@ -44,3 +44,8 @@ func (p RepositoryPushHook) PushedImageURL() string {
 func (p RepositoryPushHook) EventRepository() string {
 	return p.Repository
 }
+
+// EventTag is an implementation of the hooks.PushEvent interface.
+func (p RepositoryPushHook) EventTag() string {
+	return p.UpdatedTags[0]
+}

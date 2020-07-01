@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"regexp"
 	"time"
 
 	"github.com/gitops-tools/image-hooks/pkg/client"
@@ -55,6 +56,16 @@ func (u *Updater) UpdateFromHook(ctx context.Context, h hooks.PushEvent) error {
 	if cfg == nil {
 		u.log.Infow("failed to find repo", "name", h.EventRepository())
 		return nil
+	}
+	if cfg.TagMatch != "" {
+		re, err := regexp.Compile(cfg.TagMatch)
+		if err != nil {
+			return fmt.Errorf("failed to compile TagMatch regular expression: %s", err)
+		}
+		if !re.MatchString(h.EventTag()) {
+			u.log.Infow("failed to match tag", "tag", h.EventTag(), "tagMatch", cfg.TagMatch)
+			return nil
+		}
 	}
 	u.log.Infow("found repo", "name", h.EventRepository(), "newURL", h.PushedImageURL())
 	return u.UpdateRepository(ctx, cfg, h.PushedImageURL())

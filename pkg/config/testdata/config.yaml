@@ -1,7 +1,8 @@
 repositories:
   - name: testing/repo-image
     sourceRepo: example/example-source
-    sourceBranch: master
+    sourceBranch: main
     filePath: test/file.yaml
     updateKey: person.name
     branchGenerateName: repo-imager-
+    tagMatch: ".*main"

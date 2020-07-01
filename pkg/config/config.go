@@ -8,7 +8,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// Repository is the items that are requird to update a specific file in a repo.
+// Repository is the items that are required to update a specific file in a repo.
 type Repository struct {
 	Name               string `json:"name"`
 	SourceRepo         string `json:"sourceRepo"`
@@ -16,6 +16,7 @@ type Repository struct {
 	FilePath           string `json:"filePath"`
 	UpdateKey          string `json:"updateKey"`
 	BranchGenerateName string `json:"branchGenerateName"`
+	TagMatch           string `json:"tagMatch"`
 }
 
 // Parse reads and returns a configuration from Reader.
