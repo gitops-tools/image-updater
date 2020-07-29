@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/gitops-tools/image-hooks/test"
+	"github.com/gitops-tools/image-updater/test"
 	"github.com/google/go-cmp/cmp"
 	"github.com/jenkins-x/go-scm/scm"
 	"github.com/jenkins-x/go-scm/scm/factory"

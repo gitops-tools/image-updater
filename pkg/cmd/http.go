@@ -9,13 +9,13 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
-	"github.com/gitops-tools/image-hooks/pkg/client"
-	"github.com/gitops-tools/image-hooks/pkg/config"
-	"github.com/gitops-tools/image-hooks/pkg/handler"
-	"github.com/gitops-tools/image-hooks/pkg/hooks"
-	"github.com/gitops-tools/image-hooks/pkg/hooks/docker"
-	"github.com/gitops-tools/image-hooks/pkg/hooks/quay"
-	"github.com/gitops-tools/image-hooks/pkg/updater"
+	"github.com/gitops-tools/image-updater/pkg/client"
+	"github.com/gitops-tools/image-updater/pkg/config"
+	"github.com/gitops-tools/image-updater/pkg/handler"
+	"github.com/gitops-tools/image-updater/pkg/hooks"
+	"github.com/gitops-tools/image-updater/pkg/hooks/docker"
+	"github.com/gitops-tools/image-updater/pkg/hooks/quay"
+	"github.com/gitops-tools/image-updater/pkg/updater"
 )
 
 func makeHTTPCmd() *cobra.Command {
@@ -71,7 +71,7 @@ func makeHTTPCmd() *cobra.Command {
 
 	cmd.Flags().String(
 		"config",
-		"/etc/image-hooks/config.yaml",
+		"/etc/image-updater/config.yaml",
 		"repository configuration",
 	)
 	logIfError(viper.BindPFlag("config", cmd.Flags().Lookup("config")))

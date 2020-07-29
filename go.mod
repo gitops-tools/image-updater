@@ -1,4 +1,4 @@
-module github.com/gitops-tools/image-hooks
+module github.com/gitops-tools/image-updater
 
 go 1.14
 

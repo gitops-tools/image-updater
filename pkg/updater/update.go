@@ -7,11 +7,11 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/gitops-tools/image-hooks/pkg/client"
-	"github.com/gitops-tools/image-hooks/pkg/config"
-	"github.com/gitops-tools/image-hooks/pkg/hooks"
-	"github.com/gitops-tools/image-hooks/pkg/names"
-	"github.com/gitops-tools/image-hooks/pkg/syaml"
+	"github.com/gitops-tools/image-updater/pkg/client"
+	"github.com/gitops-tools/image-updater/pkg/config"
+	"github.com/gitops-tools/image-updater/pkg/hooks"
+	"github.com/gitops-tools/image-updater/pkg/names"
+	"github.com/gitops-tools/image-updater/pkg/syaml"
 	"github.com/jenkins-x/go-scm/scm"
 )
 

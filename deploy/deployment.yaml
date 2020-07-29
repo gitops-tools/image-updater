@@ -1,46 +1,46 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: image-hooks-http
+  name: image-updater-http
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: image-hooks-http
+      app.kubernetes.io/name: image-updater-http
   template:
     metadata:
      labels:
-       app.kubernetes.io/name: image-hooks-http
+       app.kubernetes.io/name: image-updater-http
     spec:
       containers:
-        - name: image-hooks-http
-          image: bigkevmcd/image-hooks:latest
+        - name: image-updater-http
+          image: bigkevmcd/image-updater:latest
           imagePullPolicy: Always
           args: ["http", "--parser", "docker"]
           volumeMounts:
           - name: config-volume
-            mountPath: /etc/image-hooks
+            mountPath: /etc/image-updater
           env:
             - name: AUTH_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: image-hooks-secret
+                  name: image-updater-secret
                   key: token
       volumes:
         - name: config-volume
           configMap:
-            name: image-hooks-config
+            name: image-updater-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: image-hooks-http
+  name: image-updater-http
   namespace: default
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/name: image-hooks-http
+    app.kubernetes.io/name: image-updater-http
   ports:
     - protocol: TCP
       port: 8080

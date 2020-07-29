@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/gitops-tools/image-hooks/pkg/hooks"
+	"github.com/gitops-tools/image-updater/pkg/hooks"
 )
 
 var _ hooks.PushEvent = (*Webhook)(nil)

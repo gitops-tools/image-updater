@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/gitops-tools/image-hooks/pkg/hooks"
+	"github.com/gitops-tools/image-updater/pkg/hooks"
 )
 
 // Parse takes an http.Request and parses it into a Quay.io Push hook if

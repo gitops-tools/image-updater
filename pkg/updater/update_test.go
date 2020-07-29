@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gitops-tools/image-hooks/pkg/client/mock"
-	"github.com/gitops-tools/image-hooks/pkg/config"
-	"github.com/gitops-tools/image-hooks/pkg/hooks/quay"
+	"github.com/gitops-tools/image-updater/pkg/client/mock"
+	"github.com/gitops-tools/image-updater/pkg/config"
+	"github.com/gitops-tools/image-updater/pkg/hooks/quay"
 	"github.com/jenkins-x/go-scm/scm"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"

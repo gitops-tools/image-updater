@@ -46,7 +46,7 @@ spec:
       default: "false"
   steps:
     - name: update-image
-      image: bigkevmcd/image-hooks:latest
+      image: bigkevmcd/image-updater:latest
       args:
         - "update"
         - "--driver=$(params.driver)"

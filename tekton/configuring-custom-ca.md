@@ -1,6 +1,6 @@
 # Configuring a Custom CA Chain
 
-You may need image-hooks to interact with Git servers exposed using TLS which do not have a certificate signed by a well-known Certificate Authority.
+You may need image-updater to interact with Git servers exposed using TLS which do not have a certificate signed by a well-known Certificate Authority.
 
 In such cases you can use the `--insecure` flag, or even better, load your custom CA Chain into the container which runs the task.
 
@@ -13,7 +13,7 @@ the certificate being used by your Git Server. You can get it using a web browse
 
 Once we have our CA Chain file with PEM format, we can go ahead and create a ConfigMap in order to store the CA Chain in the Kubernetes cluster where Tekton is running.
 
-The ConfigMap must be created in the same namespace where the Tekton task for `image-hooks` is defined.
+The ConfigMap must be created in the same namespace where the Tekton task for `image-updater` is defined.
 
 ~~~sh
 kubectl -n <tekton-task-namespace> create configmap custom-ca-chain --from-file=ca-bundle.crt=</path/to/your/cachain/in/pem/format>
@@ -21,9 +21,9 @@ kubectl -n <tekton-task-namespace> create configmap custom-ca-chain --from-file=
 
 ## Configuring a Volume on the Tekton Task
 
-We have our Custom CA Chain loaded into Kubernetes as a ConfigMap, now we need to configure the `image-hooks` Tekton task to make use of it.
+We have our Custom CA Chain loaded into Kubernetes as a ConfigMap, now we need to configure the `image-updater` Tekton task to make use of it.
 
-You can find the definition of the `image-hooks` Tekton Task [here](https://github.com/gitops-tools/image-hooks/blob/main/tekton/image-updater.yaml). We are using this Task as reference.
+You can find the definition of the `image-updater` Tekton Task [here](https://github.com/gitops-tools/image-updater/blob/main/tekton/image-updater.yaml). We are using this Task as reference.
 
 You need to add the `volumeMounts` and `volumes` sections to the Tekton Task spec.
 
@@ -31,7 +31,7 @@ You need to add the `volumeMounts` and `volumes` sections to the Tekton Task spe
 <OUTPUT_OMMITED>
   steps:
     - name: update-image
-      image: bigkevmcd/image-hooks:latest
+      image: bigkevmcd/image-updater:latest
       args:
         - "update"
         - "--driver=$(params.driver)"

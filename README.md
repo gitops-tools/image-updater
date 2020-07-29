@@ -1,4 +1,4 @@
-# image-hooks ![Go](https://github.com/gitops-tools/image-hooks/workflows/Go/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/gitops-tools/image-hooks)](https://goreportcard.com/report/github.com/gitops-tools/image-hooks)
+# image-updater ![Go](https://github.com/gitops-tools/image-updater/workflows/Go/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/gitops-tools/image-updater)](https://goreportcard.com/report/github.com/gitops-tools/image-updater)
 
 This is a small tool and service for updating YAML files with image references,
 to simplify continuous deployment pipelines.
@@ -8,11 +8,11 @@ It updates a YAML file in a Git repository, and optionally opens a Pull Request.
 ## Command-line tool
 
 ```shell
-$ ./image-hooks --help
+$ ./image-updater --help
 Update YAML files in a Git service, with optional automated Pull Requests
 
 Usage:
-  image-hooks [command]
+  image-updater [command]
 
 Available Commands:
   help        Help about any command
@@ -20,9 +20,9 @@ Available Commands:
   update      update a repository configuration
 
 Flags:
-  -h, --help   help for image-hooks
+  -h, --help   help for image-updater
 
-Use "image-hooks [command] --help" for more information about a command.
+Use "image-updater [command] --help" for more information about a command.
 ```
 
 There are two sub-commands, `http` and `update`.
@@ -35,7 +35,7 @@ functionality from the command-line.
 This requires a `AUTH_TOKEN` environment variable with a token.
 
 ```shell
-$ ./image-hooks update --file-path service-a/deployment.yaml --image-repo quay.io/myorg/my-image --source-repo mysource/my-repo --new-image-url quay.io/myorg/my-image:v1.1.0 --update-key spec.template.spec.containers.0.image
+$ ./image-updater update --file-path service-a/deployment.yaml --image-repo quay.io/myorg/my-image --source-repo mysource/my-repo --new-image-url quay.io/myorg/my-image:v1.1.0 --update-key spec.template.spec.containers.0.image
 ```
 
 This would update a file `service-a/deployment.yaml` in a GitHub repo at `mysource/my-repo`, changing the `spec.template.spec.containers.0.image` key in the file to `quay.io/myorg/my-image:v1.1.0`, the PR will indicate that this is an update from `quay.io/myorg/my-image`.
@@ -44,7 +44,7 @@ If you need to access a private GitLab or GitHub installation, you can provide
 the `--api-endpoint` e.g.
 
 ```shell
-$ ./image-hooks update --file-path service-a/deployment.yaml --image-repo quay.io/myorg/my-image --source-repo mysource/my-repo --new-image-url quay.io/myorg/my-image:v1.1.0 --update-key spec.template.spec.containers.0.image
+$ ./image-updater update --file-path service-a/deployment.yaml --image-repo quay.io/myorg/my-image --source-repo mysource/my-repo --new-image-url quay.io/myorg/my-image:v1.1.0 --update-key spec.template.spec.containers.0.image
 ```
 
 For the HTTP service, you will likely need to adapt the deployment.
@@ -107,7 +107,7 @@ The tool reads a YAML definition, which in the provided `Deployment` is mounted
 in from a `ConfigMap`.
 
 ```shell
-$ kubectl create configmap image-hooks-config --from-file=config.yaml
+$ kubectl create configmap image-updater-config --from-file=config.yaml
 ```
 
 The default deployment requires a secret to expose the `GITHUB_TOKEN` to the
@@ -116,7 +116,7 @@ service.
 
 ```shell
 $ export GITHUB_TOKEN=<insert github token>
-$ kubectl create secret generic image-hooks-secret --from-literal=token=$GITHUB_TOKEN
+$ kubectl create secret generic image-updater-secret --from-literal=token=$GITHUB_TOKEN
 ```
 
 ## Deployment
@@ -148,7 +148,7 @@ updates to repos from a Tekton pipeline run.
 A `Dockerfile` is provided for building a container, but otherwise:
 
 ```shell
-$ go build ./cmd/image-hooks
+$ go build ./cmd/image-updater
 ```
 
 ## Testing

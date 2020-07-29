@@ -26,7 +26,7 @@ func logIfError(e error) {
 
 func makeRootCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              "image-hooks",
+		Use:              "image-updater",
 		TraverseChildren: true,
 		Short:            "Update YAML files in a Git service, with optional automated Pull Requests",
 	}
