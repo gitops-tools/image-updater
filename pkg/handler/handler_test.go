@@ -3,20 +3,23 @@ package handler
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gitops-tools/pkg/client/mock"
+	"github.com/gitops-tools/pkg/updater"
+	"github.com/go-logr/zapr"
+	"github.com/jenkins-x/go-scm/scm"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
 
-	"github.com/gitops-tools/image-updater/pkg/client/mock"
+	"github.com/gitops-tools/image-updater/pkg/applier"
 	"github.com/gitops-tools/image-updater/pkg/config"
 	"github.com/gitops-tools/image-updater/pkg/hooks"
 	"github.com/gitops-tools/image-updater/pkg/hooks/quay"
-	"github.com/gitops-tools/image-updater/pkg/updater"
-	"github.com/jenkins-x/go-scm/scm"
 )
 
 const (
@@ -27,22 +30,21 @@ const (
 
 func TestHandler(t *testing.T) {
 	testSHA := "980a0d5f19a64b4b30a87d4206aade58726b60e3"
-	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel))
+	logger := zapr.NewLogger(zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)))
 	m := mock.New(t)
-	m.AddFileContents(testGitHubRepo, testFilePath, "master", []byte("test:\n  image: old-image\n"))
 	m.AddBranchHead(testGitHubRepo, "master", testSHA)
-	updater := updater.New(logger.Sugar(), m, createConfigs(), updater.NameGenerator(stubNameGenerator{"a"}))
-	h := New(logger.Sugar(), updater, quay.Parse)
+	m.AddFileContents(testGitHubRepo, testFilePath, "master", []byte("test:\n  image: old-image\n"))
+	h := New(logger, applier.New(logger, m, createConfigs(), updater.NameGenerator(stubNameGenerator{"a"})), quay.Parse)
 	rec := httptest.NewRecorder()
 	req := makeHookRequest(t, "testdata/push_hook.json")
 
 	h.ServeHTTP(rec, req)
 
 	m.AssertPullRequestCreated(testGitHubRepo, &scm.PullRequestInput{
-		Title: "Image mynamespace/repository updated",
+		Body:  fmt.Sprintf("Automated update from %q", testQuayRepo),
 		Head:  "test-branch-a",
 		Base:  "master",
-		Body:  "Automated Image Update",
+		Title: "Automated image update",
 	})
 }
 
@@ -50,22 +52,16 @@ func TestHandlerWithParseFailure(t *testing.T) {
 	badParser := func(*http.Request) (hooks.PushEvent, error) {
 		return nil, errors.New("failed")
 	}
-
-	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel))
+	logger := zapr.NewLogger(zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)))
 	m := mock.New(t)
-	updater := updater.New(logger.Sugar(), m, createConfigs(), updater.NameGenerator(stubNameGenerator{"a"}))
-	h := New(logger.Sugar(), updater, badParser)
+	applier := applier.New(logger, m, createConfigs(), updater.NameGenerator(stubNameGenerator{"a"}))
+	h := New(logger, applier, badParser)
 	rec := httptest.NewRecorder()
 	req := makeHookRequest(t, "testdata/push_hook.json")
 
 	h.ServeHTTP(rec, req)
 
-	m.RefutePullRequestCreated(testGitHubRepo, &scm.PullRequestInput{
-		Title: "Image mynamespace/repository updated",
-		Head:  "test-branch-a",
-		Base:  "master",
-		Body:  "Automated Image Update",
-	})
+	m.AssertNoPullRequestsCreated()
 	res := rec.Result()
 	if res.StatusCode != http.StatusInternalServerError {
 		t.Fatalf("StatusCode got %d, want %d", res.StatusCode, http.StatusInternalServerError)
@@ -73,21 +69,16 @@ func TestHandlerWithParseFailure(t *testing.T) {
 }
 
 func TestHandlerWithFailureToUpdate(t *testing.T) {
-	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel))
+	logger := zapr.NewLogger(zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)))
 	m := mock.New(t)
-	updater := updater.New(logger.Sugar(), m, createConfigs(), updater.NameGenerator(stubNameGenerator{"a"}))
-	h := New(logger.Sugar(), updater, quay.Parse)
+	applier := applier.New(logger, m, createConfigs(), updater.NameGenerator(stubNameGenerator{"a"}))
+	h := New(logger, applier, quay.Parse)
 	rec := httptest.NewRecorder()
 	req := makeHookRequest(t, "testdata/push_hook.json")
 
 	h.ServeHTTP(rec, req)
 
-	m.RefutePullRequestCreated(testGitHubRepo, &scm.PullRequestInput{
-		Title: "Image mynamespace/repository updated",
-		Head:  "test-branch-a",
-		Base:  "master",
-		Body:  "Automated Image Update",
-	})
+	m.AssertNoPullRequestsCreated()
 	res := rec.Result()
 	if res.StatusCode != http.StatusInternalServerError {
 		t.Fatalf("StatusCode got %d, want %d", res.StatusCode, http.StatusInternalServerError)

@@ -5,17 +5,18 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-logr/zapr"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
-	"github.com/gitops-tools/image-updater/pkg/client"
+	"github.com/gitops-tools/image-updater/pkg/applier"
 	"github.com/gitops-tools/image-updater/pkg/config"
 	"github.com/gitops-tools/image-updater/pkg/handler"
 	"github.com/gitops-tools/image-updater/pkg/hooks"
 	"github.com/gitops-tools/image-updater/pkg/hooks/docker"
 	"github.com/gitops-tools/image-updater/pkg/hooks/quay"
-	"github.com/gitops-tools/image-updater/pkg/updater"
+	"github.com/gitops-tools/pkg/client"
 )
 
 func makeHTTPCmd() *cobra.Command {
@@ -23,16 +24,15 @@ func makeHTTPCmd() *cobra.Command {
 		Use:   "http",
 		Short: "update repositories in response to image hooks",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			logger, _ := zap.NewProduction()
+			zapl, _ := zap.NewProduction()
 			defer func() {
-				_ = logger.Sync() // flushes buffer, if any
+				_ = zapl.Sync() // flushes buffer, if any
 			}()
+			logger := zapr.NewLogger(zapl)
 			scmClient, err := createClientFromViper()
 			if err != nil {
 				return fmt.Errorf("failed to create a git driver: %s", err)
 			}
-			sugar := logger.Sugar()
-
 			f, err := os.Open(viper.GetString("config"))
 			if err != nil {
 				return err
@@ -42,15 +42,15 @@ func makeHTTPCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			updater := updater.New(sugar, client.New(scmClient), repos)
+			applier := applier.New(logger, client.New(scmClient), repos)
 			p, err := parser()
 			if err != nil {
 				return err
 			}
-			handler := handler.New(sugar, updater, p)
+			handler := handler.New(logger, applier, p)
 			http.Handle("/", handler)
 			listen := fmt.Sprintf(":%d", viper.GetInt("port"))
-			sugar.Infow("quay-hooks http starting", "port", viper.GetInt("port"), "parser", viper.GetString("parser"))
+			logger.Info("quay-hooks http starting", "port", viper.GetInt("port"), "parser", viper.GetString("parser"))
 			return http.ListenAndServe(listen, nil)
 		},
 	}
