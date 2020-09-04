@@ -1,4 +1,4 @@
-package updater
+package applier
 
 import (
 	"context"
@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gitops-tools/image-updater/pkg/client/mock"
 	"github.com/gitops-tools/image-updater/pkg/config"
 	"github.com/gitops-tools/image-updater/pkg/hooks/quay"
+	"github.com/gitops-tools/pkg/client/mock"
+	"github.com/gitops-tools/pkg/updater"
+	"github.com/go-logr/zapr"
 	"github.com/jenkins-x/go-scm/scm"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
@@ -25,14 +27,11 @@ func TestUpdaterWithUnknownRepo(t *testing.T) {
 	m := mock.New(t)
 	m.AddFileContents(testGitHubRepo, testFilePath, "master", []byte("test:\n  image: old-image\n"))
 	m.AddBranchHead(testGitHubRepo, "master", testSHA)
-	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)).Sugar()
-
-	updater := New(logger, m, createConfigs())
-	updater.nameGenerator = stubNameGenerator{"a"}
+	applier := makeApplier(t, m, createConfigs())
 	hook := createHook()
 	hook.Repository = "unknown/repo"
 
-	err := updater.UpdateFromHook(context.Background(), hook)
+	err := applier.UpdateFromHook(context.Background(), hook)
 
 	// A non-matching repo is not considered an error.
 	if err != nil {
@@ -43,6 +42,7 @@ func TestUpdaterWithUnknownRepo(t *testing.T) {
 		t.Fatalf("update failed, got %#v, want %#v", s, "")
 	}
 	m.RefuteBranchCreated(testGitHubRepo, "test-branch-a", testSHA)
+
 	m.RefutePullRequestCreated(testGitHubRepo, &scm.PullRequestInput{
 		Title: fmt.Sprintf("Image %s updated", testQuayRepo),
 		Body:  "Automated Image Update",
@@ -56,17 +56,13 @@ func TestUpdaterWithNonMatchingTag(t *testing.T) {
 	m := mock.New(t)
 	m.AddFileContents(testGitHubRepo, testFilePath, "master", []byte("test:\n  image: old-image\n"))
 	m.AddBranchHead(testGitHubRepo, "master", testSHA)
-	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)).Sugar()
-
 	configs := createConfigs()
 	configs.Repositories[0].BranchGenerateName = ""
 	configs.Repositories[0].TagMatch = "^v.*"
-
-	updater := New(logger, m, configs)
-	updater.nameGenerator = stubNameGenerator{"a"}
+	applier := makeApplier(t, m, configs)
 	hook := createHook()
 
-	err := updater.UpdateFromHook(context.Background(), hook)
+	err := applier.UpdateFromHook(context.Background(), hook)
 
 	// A non-matching tag is not considered an error.
 	if err != nil {
@@ -81,13 +77,10 @@ func TestUpdaterWithKnownRepo(t *testing.T) {
 	m := mock.New(t)
 	m.AddFileContents(testGitHubRepo, testFilePath, "master", []byte("test:\n  image: old-image\n"))
 	m.AddBranchHead(testGitHubRepo, "master", testSHA)
-	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)).Sugar()
-
-	updater := New(logger, m, createConfigs())
-	updater.nameGenerator = stubNameGenerator{"a"}
+	applier := makeApplier(t, m, createConfigs())
 	hook := createHook()
 
-	err := updater.UpdateFromHook(context.Background(), hook)
+	err := applier.UpdateFromHook(context.Background(), hook)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,8 +92,8 @@ func TestUpdaterWithKnownRepo(t *testing.T) {
 	}
 	m.AssertBranchCreated(testGitHubRepo, "test-branch-a", testSHA)
 	m.AssertPullRequestCreated(testGitHubRepo, &scm.PullRequestInput{
-		Title: fmt.Sprintf("Image %s updated", testQuayRepo),
-		Body:  "Automated Image Update",
+		Title: "Automated image update",
+		Body:  fmt.Sprintf("Automated update from %q", testQuayRepo),
 		Head:  "test-branch-a",
 		Base:  "master",
 	})
@@ -114,16 +107,13 @@ func TestUpdaterWithNoNameGenerator(t *testing.T) {
 	m := mock.New(t)
 	m.AddFileContents(testGitHubRepo, testFilePath, sourceBranch, []byte("test:\n  image: old-image\n"))
 	m.AddBranchHead(testGitHubRepo, sourceBranch, testSHA)
-	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)).Sugar()
-
 	configs := createConfigs()
 	configs.Repositories[0].BranchGenerateName = ""
 	configs.Repositories[0].SourceBranch = sourceBranch
-	updater := New(logger, m, configs)
-	updater.nameGenerator = stubNameGenerator{"a"}
+	applier := makeApplier(t, m, configs)
 	hook := createHook()
 
-	err := updater.UpdateFromHook(context.Background(), hook)
+	err := applier.UpdateFromHook(context.Background(), hook)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -142,15 +132,12 @@ func TestUpdaterWithMissingFile(t *testing.T) {
 	m := mock.New(t)
 	m.AddFileContents(testGitHubRepo, testFilePath, "master", []byte("test:\n  image: old-image\n"))
 	m.AddBranchHead(testGitHubRepo, "master", testSHA)
-	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)).Sugar()
-
-	updater := New(logger, m, createConfigs())
-	updater.nameGenerator = stubNameGenerator{"a"}
+	applier := makeApplier(t, m, createConfigs())
 	hook := createHook()
 	testErr := errors.New("missing file")
 	m.GetFileErr = testErr
 
-	err := updater.UpdateFromHook(context.Background(), hook)
+	err := applier.UpdateFromHook(context.Background(), hook)
 
 	if err != testErr {
 		t.Fatalf("got %s, want %s", err, testErr)
@@ -168,15 +155,12 @@ func TestUpdaterWithBranchCreationFailure(t *testing.T) {
 	m := mock.New(t)
 	m.AddFileContents(testGitHubRepo, testFilePath, "master", []byte("test:\n  image: old-image\n"))
 	m.AddBranchHead(testGitHubRepo, "master", testSHA)
-	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)).Sugar()
-
-	updater := New(logger, m, createConfigs())
-	updater.nameGenerator = stubNameGenerator{"a"}
+	applier := makeApplier(t, m, createConfigs())
 	hook := createHook()
 	testErr := errors.New("can't create branch")
 	m.CreateBranchErr = testErr
 
-	err := updater.UpdateFromHook(context.Background(), hook)
+	err := applier.UpdateFromHook(context.Background(), hook)
 
 	if err.Error() != "failed to create branch: can't create branch" {
 		t.Fatalf("got %s, want %s", err, "failed to create branch: can't create branch")
@@ -194,15 +178,12 @@ func TestUpdaterWithUpdateFileFailure(t *testing.T) {
 	m := mock.New(t)
 	m.AddFileContents(testGitHubRepo, testFilePath, "master", []byte("test:\n  image: old-image\n"))
 	m.AddBranchHead(testGitHubRepo, "master", testSHA)
-	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)).Sugar()
-
-	updater := New(logger, m, createConfigs())
-	updater.nameGenerator = stubNameGenerator{"a"}
+	applier := makeApplier(t, m, createConfigs())
 	hook := createHook()
 	testErr := errors.New("can't update file")
 	m.UpdateFileErr = testErr
 
-	err := updater.UpdateFromHook(context.Background(), hook)
+	err := applier.UpdateFromHook(context.Background(), hook)
 
 	if err.Error() != "failed to update file: can't update file" {
 		t.Fatalf("got %s, want %s", err, "failed to update file: can't update file")
@@ -225,17 +206,14 @@ func TestUpdaterWithCreatePullRequestFailure(t *testing.T) {
 	m := mock.New(t)
 	m.AddFileContents(testGitHubRepo, testFilePath, "master", []byte("test:\n  image: old-image\n"))
 	m.AddBranchHead(testGitHubRepo, "master", testSHA)
-	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)).Sugar()
-
-	updater := New(logger, m, createConfigs())
-	updater.nameGenerator = stubNameGenerator{"a"}
+	applier := makeApplier(t, m, createConfigs())
 	hook := createHook()
-	testErr := errors.New("can't create pull-request")
+	testErr := errors.New("failure")
 	m.CreatePullRequestErr = testErr
 
-	err := updater.UpdateFromHook(context.Background(), hook)
+	err := applier.UpdateFromHook(context.Background(), hook)
 
-	if err.Error() != "failed to create a pull request: can't create pull-request" {
+	if err.Error() != "failed to create pull request in repo testorg/testrepo: failed to create a pull request: failure" {
 		t.Fatalf("got %s, want %s", err, "failed to create a pull request: can't create pull-request")
 	}
 	updated := m.GetUpdatedContents(testGitHubRepo, testFilePath, "test-branch-a")
@@ -257,14 +235,12 @@ func TestUpdaterWithNonMasterSourceBranch(t *testing.T) {
 	m := mock.New(t)
 	m.AddFileContents(testGitHubRepo, testFilePath, "staging", []byte("test:\n  image: old-image\n"))
 	m.AddBranchHead(testGitHubRepo, "staging", testSHA)
-	logger := zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)).Sugar()
 	configs := createConfigs()
 	configs.Repositories[0].SourceBranch = "staging"
-	updater := New(logger, m, configs)
-	updater.nameGenerator = stubNameGenerator{"a"}
+	applier := makeApplier(t, m, configs)
 	hook := createHook()
 
-	err := updater.UpdateFromHook(context.Background(), hook)
+	err := applier.UpdateFromHook(context.Background(), hook)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -276,11 +252,17 @@ func TestUpdaterWithNonMasterSourceBranch(t *testing.T) {
 	}
 	m.AssertBranchCreated(testGitHubRepo, "test-branch-a", testSHA)
 	m.AssertPullRequestCreated(testGitHubRepo, &scm.PullRequestInput{
-		Title: fmt.Sprintf("Image %s updated", testQuayRepo),
-		Body:  "Automated Image Update",
+		Title: "Automated image update",
+		Body:  fmt.Sprintf("Automated update from %q", testQuayRepo),
 		Head:  "test-branch-a",
 		Base:  "staging",
 	})
+}
+
+func makeApplier(t *testing.T, m *mock.MockClient, cfgs *config.RepoConfiguration) *Applier {
+	logger := zapr.NewLogger(zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)))
+	applier := New(logger, m, cfgs, updater.NameGenerator(stubNameGenerator{name: "a"}))
+	return applier
 }
 
 func createHook() *quay.RepositoryPushHook {

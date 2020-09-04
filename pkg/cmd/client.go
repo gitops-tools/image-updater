@@ -12,17 +12,19 @@ import (
 
 func createClientFromViper() (*scm.Client, error) {
 	authToken := viper.GetString(authTokenFlag)
+	driver := viper.GetString(driverFlag)
+	apiEndpoint := viper.GetString(apiEndpointFlag)
 	if viper.GetBool(insecureFlag) {
 		return factory.NewClient(
-			viper.GetString(driverFlag),
-			viper.GetString(apiEndpointFlag),
+			driver,
+			apiEndpoint,
 			"",
 			factory.Client(makeInsecureClient(authToken)))
 
 	}
 	return factory.NewClient(
-		viper.GetString(driverFlag),
-		viper.GetString(apiEndpointFlag),
+		driver,
+		apiEndpoint,
 		authToken)
 }
 

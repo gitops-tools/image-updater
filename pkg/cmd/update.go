@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-logr/zapr"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
-	"github.com/gitops-tools/image-updater/pkg/client"
+	"github.com/gitops-tools/image-updater/pkg/applier"
 	"github.com/gitops-tools/image-updater/pkg/config"
-	"github.com/gitops-tools/image-updater/pkg/updater"
+	"github.com/gitops-tools/pkg/client"
 )
 
 func makeUpdateCmd() *cobra.Command {
@@ -26,10 +27,8 @@ func makeUpdateCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("failed to create a git driver: %s", err)
 			}
-
-			sugar := logger.Sugar()
-			updater := updater.New(sugar, client.New(scmClient), nil)
-			return updater.UpdateRepository(context.Background(), configFromFlags(), viper.GetString("new-image-url"))
+			applier := applier.New(zapr.NewLogger(logger), client.New(scmClient), nil)
+			return applier.UpdateRepository(context.Background(), configFromFlags(), viper.GetString("new-image-url"))
 		},
 	}
 
