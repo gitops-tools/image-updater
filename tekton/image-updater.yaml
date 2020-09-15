@@ -35,6 +35,7 @@ spec:
       description: >
         Prefix for naming automatically generated branch, if empty, this will
         update source-branch
+      default: ""
     - name: update-key
       type: string
       description: >
