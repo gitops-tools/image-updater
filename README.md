@@ -17,6 +17,7 @@ Usage:
 Available Commands:
   help        Help about any command
   http        update repositories in response to image hooks
+  pubsub      update repositories in response to gcr pubsub events
   update      update a repository configuration
 
 Flags:
@@ -25,9 +26,9 @@ Flags:
 Use "image-updater [command] --help" for more information about a command.
 ```
 
-There are two sub-commands, `http` and `update`.
+There are three sub-commands, `http`, `pubsub` and `update`.
 
-`http` provides a Webhook service, and `update` will perform the same
+`http` provides a Webhook service, `pubsub` subscribes to pubsub events and `update` will perform the same
 functionality from the command-line.
 
 ## Update tool
@@ -57,15 +58,22 @@ This is a micro-service for updating Git Repos when a hook is received indicatin
 
 This currently supports receiving hooks from Docker and Quay.io.
 
-## WARNING
+### WARNING
 
 Neither Docker Hub nor Quay.io provide a way for receivers to authenticate Webhooks, which makes this insecure, a malicious user could trigger the creation of pull requests in your git hosting service.
 
 Please understand the risks of using this component.
 
+## Pubsub Service
+Similarly to the Webhook service, the pubsub services allows to update Git Repos when a pubsub Event is received. 
+
+This currently supports Events from [Google Cloud Registry](https://cloud.google.com/container-registry/docs/configuring-notifications).
+
+It requires two arguments `--project-id` and `--subscription-name`. See [below](#google-container-registry-setup) for more details on how to setup the subscription.
+
 ## Configuration
 
-This service uses a really simple configuration:
+Both the Webhook and Pubsub service uses a really simple configuration:
 
 ```yaml
 repositories:
@@ -133,6 +141,7 @@ changed to support Quay.io.
 The `--parser` command-line option chooses which of the supported (Quay, Docker)
 hook formats to parse.
 
+
 ## Exposing the Handler
 
 The Service exposes a Hook handler at `/` on port 8080 that handles the
@@ -142,6 +151,22 @@ configured hook type.
 
 A Tekton task is provided in [./tekton](./tekton) which allows you to apply
 updates to repos from a Tekton pipeline run.
+
+
+## Google Container registry setup
+```bash
+gcloud pubsub topics create gcr
+gcloud pubsub subscriptions create gcr-image-updater --topic projects/$GOOGLE_PROJECT/topics/gcr
+
+gcloud iam service-accounts create 
+gcloud iam service-accounts keys create credentials.json \
+  --iam-account $SA_NAME@$GOOGLE_PROJECT.iam.gserviceaccount.com
+
+gcloud pubsub subscriptions add-iam-policy-binding gcr-image-updater \
+--member=serviceAccount:$SA_NAME@$GOOGLE_PROJECT.iam.gserviceaccount.com --role=roles/pubsub.subscriber
+```
+
+You then need to set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path the generated  `credentials.json` file.
 
 ## Building
 

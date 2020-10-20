@@ -1,0 +1,5 @@
+{
+  "action": "INSERT",
+  "digest": "gcr.io/mynamespace/repository@sha256:6ec128e26cd5",
+  "tag": "gcr.io/mynamespace/repository:latest"
+}

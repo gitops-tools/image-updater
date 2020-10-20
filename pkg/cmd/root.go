@@ -60,6 +60,7 @@ func makeRootCmd() *cobra.Command {
 
 	cmd.AddCommand(makeHTTPCmd())
 	cmd.AddCommand(makeUpdateCmd())
+	cmd.AddCommand(makePubsubCmd())
 	return cmd
 }
 
