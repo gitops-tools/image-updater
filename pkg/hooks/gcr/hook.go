@@ -3,8 +3,6 @@ package gcr
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"strings"
 
 	"github.com/gitops-tools/image-updater/pkg/hooks"
@@ -32,16 +30,11 @@ func (m PushMessage) EventTag() string {
 	return strings.Split(m.Tag, ":")[1]
 }
 
-// Parse takes an http request and returns a PushEvent
-func Parse(req *http.Request) (hooks.PushEvent, error) {
-	data, err := ioutil.ReadAll(req.Body)
-
-	if err != nil {
-		return nil, err
-	}
+// Parse parses a payload into a GCR PushEvent
+func Parse(payload []byte) (hooks.PushEvent, error) {
 	msg := &PushMessage{}
 
-	err = json.Unmarshal(data, &msg)
+	err := json.Unmarshal(payload, &msg)
 	if err != nil {
 		return nil, err
 	}

@@ -2,8 +2,6 @@ package pubsubhandler
 
 import (
 	"context"
-	"net/http"
-	"strings"
 
 	"github.com/gitops-tools/image-updater/pkg/applier"
 	"github.com/gitops-tools/image-updater/pkg/hooks"
@@ -26,12 +24,7 @@ func New(logger logr.Logger, u *applier.Applier, p hooks.PushEventParser) *Handl
 func (h *Handler) Handle(ctx context.Context, m message) {
 	h.log.Info("processing hook request")
 
-	req, err := h.convertToHTTP(ctx, m)
-	if err != nil {
-		h.log.Error(err, "failed to parse message")
-		return
-	}
-	hook, err := h.parser(req)
+	hook, err := h.parser(m.Data())
 	if err != nil {
 		h.log.Error(err, "failed to parse request")
 		return
@@ -45,14 +38,4 @@ func (h *Handler) Handle(ctx context.Context, m message) {
 	}
 
 	m.Ack()
-}
-
-func (h *Handler) convertToHTTP(ctx context.Context, m message) (*http.Request, error) {
-	r := strings.NewReader(string(m.Data()))
-
-	req, err := http.NewRequest("POST", "application/json", r)
-	if err != nil {
-		return nil, err
-	}
-	return req, nil
 }

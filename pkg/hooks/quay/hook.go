@@ -3,22 +3,14 @@ package quay
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 
 	"github.com/gitops-tools/image-updater/pkg/hooks"
 )
 
-// Parse takes an http.Request and parses it into a Quay.io Push hook if
-// possible.
-func Parse(req *http.Request) (hooks.PushEvent, error) {
-	// TODO: LimitReader
-	data, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return nil, err
-	}
+// Parse parses a payload it into a Quay.io Push hook if possible.
+func Parse(payload []byte) (hooks.PushEvent, error) {
 	h := &RepositoryPushHook{}
-	err = json.Unmarshal(data, h)
+	err := json.Unmarshal(payload, h)
 	if err != nil {
 		return nil, err
 	}

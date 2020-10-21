@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"io/ioutil"
 	"net/http"
 
 	"github.com/go-logr/logr"
@@ -17,14 +18,12 @@ type Handler struct {
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h.log.Info("processing hook request")
-	hook, err := h.parser(r)
+	hook, err := h.parse(r)
 	if err != nil {
 		h.log.Error(err, "failed to parse request")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	err = h.applier.UpdateFromHook(r.Context(), hook)
 
 	if err != nil {
@@ -32,6 +31,16 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (h *Handler) parse(r *http.Request) (hooks.PushEvent, error) {
+	h.log.Info("processing hook request")
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		h.log.Error(err, "failed to read request body")
+		return nil, err
+	}
+	return h.parser(data)
 }
 
 // New creates and returns a new Handler.

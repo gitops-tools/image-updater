@@ -3,21 +3,14 @@ package docker
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 
 	"github.com/gitops-tools/image-updater/pkg/hooks"
 )
 
-// Parse takes an http.Request and parses it into a Docker webhook event.
-func Parse(req *http.Request) (hooks.PushEvent, error) {
-	// TODO: LimitReader
-	data, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return nil, err
-	}
+// Parse parses a payload into a Docker webhook event.
+func Parse(payload []byte) (hooks.PushEvent, error) {
 	h := &Webhook{}
-	err = json.Unmarshal(data, h)
+	err := json.Unmarshal(payload, h)
 	if err != nil {
 		return nil, err
 	}

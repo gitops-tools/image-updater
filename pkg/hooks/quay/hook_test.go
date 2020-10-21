@@ -1,11 +1,7 @@
 package quay
 
 import (
-	"bytes"
-	"errors"
 	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/gitops-tools/image-updater/pkg/hooks"
@@ -33,28 +29,6 @@ func TestParse(t *testing.T) {
 	}
 	if diff := cmp.Diff(want, hook); diff != "" {
 		t.Fatalf("hook doesn't match:\n%s", diff)
-	}
-}
-
-func TestParseWithNoBody(t *testing.T) {
-	bodyErr := errors.New("just a test error")
-
-	req := httptest.NewRequest("POST", "/", failingReader{err: bodyErr})
-
-	_, err := Parse(req)
-	if err != bodyErr {
-		t.Fatal("expected an error")
-	}
-
-}
-
-func TestParseWithUnparseableBody(t *testing.T) {
-	req := httptest.NewRequest("POST", "/", nil)
-
-	_, err := Parse(req)
-
-	if err == nil {
-		t.Fatal("expected an error")
 	}
 }
 
@@ -99,15 +73,13 @@ func TestEventTag(t *testing.T) {
 	}
 }
 
-func makeHookRequest(t *testing.T, fixture string) *http.Request {
+func makeHookRequest(t *testing.T, fixture string) []byte {
 	t.Helper()
 	b, err := ioutil.ReadFile(fixture)
 	if err != nil {
 		t.Fatalf("failed to read %s: %s", fixture, err)
 	}
-	req := httptest.NewRequest("POST", "/", bytes.NewReader(b))
-	req.Header.Add("Content-Type", "application/json")
-	return req
+	return b
 }
 
 type failingReader struct {
