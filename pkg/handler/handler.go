@@ -35,6 +35,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) parse(r *http.Request) (hooks.PushEvent, error) {
 	h.log.Info("processing hook request")
+	// TODO: LimitReader
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		h.log.Error(err, "failed to read request body")

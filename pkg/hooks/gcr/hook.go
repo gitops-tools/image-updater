@@ -2,7 +2,7 @@ package gcr
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"strings"
 
 	"github.com/gitops-tools/image-updater/pkg/hooks"
@@ -40,7 +40,7 @@ func Parse(payload []byte) (hooks.PushEvent, error) {
 	}
 
 	if msg.Tag == "" {
-		return nil, fmt.Errorf("Tag is empty")
+		return nil, errors.New("tag is empty")
 	}
 
 	return msg, nil

@@ -13,7 +13,7 @@ var _ hooks.PushEvent = (*Webhook)(nil)
 var _ hooks.PushEventParser = Parse
 
 func TestParse(t *testing.T) {
-	req := makeHookRequest(t, "testdata/push_event.json")
+	req := readFixture(t, "testdata/push_event.json")
 
 	hook, err := Parse(req)
 	if err != nil {
@@ -83,7 +83,7 @@ func TestRepository(t *testing.T) {
 	}
 }
 
-func makeHookRequest(t *testing.T, fixture string) []byte {
+func readFixture(t *testing.T, fixture string) []byte {
 	t.Helper()
 	b, err := ioutil.ReadFile(fixture)
 	if err != nil {

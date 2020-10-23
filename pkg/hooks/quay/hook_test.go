@@ -12,7 +12,7 @@ var _ hooks.PushEvent = (*RepositoryPushHook)(nil)
 var _ hooks.PushEventParser = Parse
 
 func TestParse(t *testing.T) {
-	req := makeHookRequest(t, "testdata/push_hook.json")
+	req := readFixture(t, "testdata/push_hook.json")
 
 	hook, err := Parse(req)
 	if err != nil {
@@ -73,22 +73,11 @@ func TestEventTag(t *testing.T) {
 	}
 }
 
-func makeHookRequest(t *testing.T, fixture string) []byte {
+func readFixture(t *testing.T, fixture string) []byte {
 	t.Helper()
 	b, err := ioutil.ReadFile(fixture)
 	if err != nil {
 		t.Fatalf("failed to read %s: %s", fixture, err)
 	}
 	return b
-}
-
-type failingReader struct {
-	err error
-}
-
-func (f failingReader) Read(p []byte) (n int, err error) {
-	return 0, f.err
-}
-func (f failingReader) Close() error {
-	return f.err
 }

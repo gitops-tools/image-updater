@@ -34,7 +34,7 @@ func TestHandler(t *testing.T) {
 
 	h := New(logger, applier, gcr.Parse)
 
-	msg := makeHookMessage(t, "testdata/push_event.json")
+	msg := readFixture(t, "testdata/push_event.json")
 
 	h.Handle(context.TODO(), msg)
 
@@ -46,7 +46,7 @@ func TestHandler(t *testing.T) {
 	})
 }
 
-func makeHookMessage(t *testing.T, fixture string) *stubMessage {
+func readFixture(t *testing.T, fixture string) *stubMessage {
 	t.Helper()
 	b, err := ioutil.ReadFile(fixture)
 	if err != nil {
