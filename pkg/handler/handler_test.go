@@ -49,7 +49,7 @@ func TestHandler(t *testing.T) {
 }
 
 func TestHandlerWithParseFailure(t *testing.T) {
-	badParser := func(*http.Request) (hooks.PushEvent, error) {
+	badParser := func(payload []byte) (hooks.PushEvent, error) {
 		return nil, errors.New("failed")
 	}
 	logger := zapr.NewLogger(zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)))
@@ -85,6 +85,36 @@ func TestHandlerWithFailureToUpdate(t *testing.T) {
 	}
 }
 
+func TestParseWithNoBody(t *testing.T) {
+	logger := zapr.NewLogger(zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)))
+	m := mock.New(t)
+	applier := applier.New(logger, m, createConfigs(), updater.NameGenerator(stubNameGenerator{"a"}))
+	h := New(logger, applier, quay.Parse)
+	bodyErr := errors.New("just a test error")
+
+	req := httptest.NewRequest("POST", "/", failingReader{err: bodyErr})
+
+	_, err := h.parse(req)
+	if err != bodyErr {
+		t.Fatal("expected an error")
+	}
+}
+
+func TestParseWithUnparseableBody(t *testing.T) {
+	logger := zapr.NewLogger(zaptest.NewLogger(t, zaptest.Level(zap.WarnLevel)))
+	m := mock.New(t)
+	applier := applier.New(logger, m, createConfigs(), updater.NameGenerator(stubNameGenerator{"a"}))
+	h := New(logger, applier, quay.Parse)
+
+	req := httptest.NewRequest("POST", "/", nil)
+
+	_, err := h.parse(req)
+
+	if err == nil {
+		t.Fatal("expected an error")
+	}
+}
+
 func makeHookRequest(t *testing.T, fixture string) *http.Request {
 	t.Helper()
 	b, err := ioutil.ReadFile(fixture)
@@ -117,4 +147,15 @@ type stubNameGenerator struct {
 
 func (s stubNameGenerator) PrefixedName(p string) string {
 	return p + s.name
+}
+
+type failingReader struct {
+	err error
+}
+
+func (f failingReader) Read(p []byte) (n int, err error) {
+	return 0, f.err
+}
+func (f failingReader) Close() error {
+	return f.err
 }

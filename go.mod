@@ -3,6 +3,7 @@ module github.com/gitops-tools/image-updater
 go 1.14
 
 require (
+	cloud.google.com/go/pubsub v1.0.1
 	github.com/gitops-tools/pkg v0.0.0-20200823054310-42f81b2b396d
 	github.com/go-logr/logr v0.1.0
 	github.com/go-logr/zapr v0.1.0
