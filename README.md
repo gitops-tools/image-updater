@@ -176,6 +176,10 @@ A `Dockerfile` is provided for building a container, but otherwise:
 $ go build ./cmd/image-updater
 ```
 
+## Docker images
+
+Images are available at `bigkevmcd/image-updater:latest` or based on the tag e.g `bigkevmcd/image-updater:v0.0.2`
+
 ## Testing
 
 ```shell
