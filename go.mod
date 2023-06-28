@@ -5,13 +5,13 @@ go 1.17
 require (
 	cloud.google.com/go/pubsub v1.24.0
 	github.com/gitops-tools/pkg v0.0.0-20220215154847-d306202c099a
-	github.com/go-logr/logr v1.2.3
-	github.com/go-logr/zapr v1.2.3
+	github.com/go-logr/logr v1.2.4
+	github.com/go-logr/zapr v1.2.4
 	github.com/google/go-cmp v0.5.8
 	github.com/jenkins-x/go-scm v1.11.18
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0
-	go.uber.org/zap v1.21.0
+	go.uber.org/zap v1.24.0
 	golang.org/x/oauth2 v0.0.0-20220722155238-128564f6959c
 	sigs.k8s.io/yaml v1.3.0
 )
