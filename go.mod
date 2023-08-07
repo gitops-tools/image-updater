@@ -11,7 +11,7 @@ require (
 	github.com/jenkins-x/go-scm v1.11.18
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0
-	go.uber.org/zap v1.21.0
+	go.uber.org/zap v1.25.0
 	golang.org/x/oauth2 v0.0.0-20220722155238-128564f6959c
 	sigs.k8s.io/yaml v1.3.0
 )
@@ -21,7 +21,7 @@ require (
 	cloud.google.com/go/compute v1.7.0 // indirect
 	cloud.google.com/go/iam v0.3.0 // indirect
 	code.gitea.io/sdk/gitea v0.14.0 // indirect
-	github.com/benbjohnson/clock v1.1.0 // indirect
+	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/bluekeyes/go-gitdiff v0.4.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
@@ -47,15 +47,14 @@ require (
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.8.0 // indirect
+	github.com/stretchr/testify v1.8.1 // indirect
 	github.com/subosito/gotenv v1.3.0 // indirect
 	github.com/tidwall/gjson v1.12.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tidwall/sjson v1.2.4 // indirect
 	go.opencensus.io v0.23.0 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/sys v0.5.0 // indirect
